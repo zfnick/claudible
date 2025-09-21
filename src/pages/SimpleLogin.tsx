@@ -22,7 +22,7 @@ export default function SimpleLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
+    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col">
       <header className="border-b border-stone-200 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -35,7 +35,7 @@ export default function SimpleLogin() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      <main className="max-w-6xl mx-auto px-6 py-12 flex-1">
         <motion.h1
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -83,7 +83,7 @@ export default function SimpleLogin() {
         </div>
       </main>
 
-      <footer className="border-t border-stone-200 bg-white">
+      <footer className="border-t border-stone-200 bg-white mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-4 text-sm text-stone-500">
           2026 Claudible. All rights reserved.
         </div>

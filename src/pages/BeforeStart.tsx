@@ -28,7 +28,7 @@ export default function BeforeStart() {
   }, [provider]);
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
+    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col">
       <header className="border-b border-stone-200 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -43,7 +43,7 @@ export default function BeforeStart() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
+      <main className="max-w-6xl mx-auto px-6 py-10 flex-1">
         <div className="flex items-start gap-10">
           <img src={logos[provider ?? "aws"]} alt={providerName} className="h-16 w-16" />
           <div>
@@ -82,7 +82,7 @@ export default function BeforeStart() {
         </div>
       </main>
 
-      <footer className="border-t border-stone-200 bg-white">
+      <footer className="border-t border-stone-200 bg-white mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-4 text-sm text-stone-500">
           2026 Claudible. All rights reserved.
         </div>

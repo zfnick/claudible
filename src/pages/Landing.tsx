@@ -3,7 +3,7 @@ import { Link } from "react-router";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
+    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col">
       {/* Header */}
       <header className="border-b border-stone-200 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -26,7 +26,7 @@ export default function Landing() {
       </header>
 
       {/* Hero */}
-      <main className="max-w-6xl mx-auto px-6 py-12">
+      <main className="max-w-6xl mx-auto px-6 py-12 flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
@@ -81,7 +81,7 @@ export default function Landing() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-stone-200 bg-white">
+      <footer className="border-t border-stone-200 bg-white mt-auto">
         <div className="max-w-6xl mx-auto px-6 py-4 text-sm text-stone-500">
           2026 Claudible. All rights reserved.
         </div>

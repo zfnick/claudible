@@ -93,7 +93,6 @@ export default function Summary() {
     const trimmed = input.trim();
     if (!trimmed) return;
 
-    // Push user message
     setMessages(prev => [...prev, { role: "user", content: trimmed }]);
     setInput("");
     setLoading(true);
@@ -114,25 +113,48 @@ export default function Summary() {
       return;
     }
 
-    // Simulate "OpenAI" thinking + fetch time
+    // Simulated, convincing staged analysis (20–30s) with progressive status updates.
+    const steps: Array<string> = [
+      "Initializing compliance engine…",
+      "Gathering recent audit logs…",
+      "Checking IAM roles, policies & MFA posture…",
+      "Scanning storage buckets for public access & encryption…",
+      "Reviewing network ACLs, security groups & firewall rules…",
+      "Validating logging & monitoring (CloudTrail/CloudWatch)…",
+      "Cross-referencing with ISO 27001, SOC 2, GDPR, HIPAA controls…",
+      "Computing risk scores and mapping to Security/Governance/Risk…",
+      "Preparing visualizations and remediation guidance…"
+    ];
+
+    const totalDelay = 20000 + Math.random() * 10000; // 20–30s
+    const stepInterval = Math.floor(totalDelay / (steps.length + 1));
+
+    // Push staged updates
+    steps.forEach((s, i) => {
+      setTimeout(() => {
+        setMessages(prev => [...prev, { role: "assistant", content: s }]);
+      }, stepInterval * (i + 1));
+    });
+
+    // Finalize after long delay
     setTimeout(() => {
       const result = generateMockAnalysis(trimmed);
       setViz(result);
 
       const response = [
-        "Analyzing your environment against common controls...",
+        "Analysis complete.",
         `High-level view: ${result.scanSummary.passed} passed, ${result.scanSummary.failed} failed, ${result.scanSummary.warnings} warnings.`,
         `Top risks detected around: ${result.standards
           .filter(s => s.issues > 0)
           .slice(0, 2)
           .map(s => s.name)
           .join(", ") || "no major standards"}.`,
-        "Recommendations updated in the left panel."
+        "Updated the left panel with KPIs, charts, and recommendations."
       ].join(" ");
 
       setMessages(prev => [...prev, { role: "assistant", content: response }]);
       setLoading(false);
-    }, 1500 + Math.random() * 1000);
+    }, totalDelay);
   };
 
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -154,7 +176,7 @@ export default function Summary() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900">
+    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900">
       {/* Header */}
       <header className="border-b border-stone-200 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -168,7 +190,7 @@ export default function Summary() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-6">
+      <main className="max-w-7xl mx-auto px-6 py-6 flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: Visualization (fixed height + scrollable; initially empty) */}
           <motion.div
@@ -323,7 +345,7 @@ export default function Summary() {
         </div>
       </main>
 
-      <footer className="border-t border-stone-200 bg-white">
+      <footer className="border-t border-stone-200 bg-white mt-auto">
         <div className="max-w-7xl mx-auto px-6 py-4 text-sm text-stone-500">
           2026 Claudible. All rights reserved.
         </div>
