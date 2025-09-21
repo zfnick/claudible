@@ -134,15 +134,30 @@ export default function Summary() {
     const trimmed = input.trim();
     if (!trimmed) return;
 
+    // Always show the user's message
     setMessages(prev => [...prev, { role: "user", content: trimmed }]);
     setInput("");
+
+    // Guardrail: if off-topic, do not start the checking phase
+    if (!isOnTopic(trimmed)) {
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "I'm focused on cloud security and compliance. Ask about audits, controls, risks, IAM, encryption, logging/monitoring, or standards like ISO 27001, SOC 2, GDPR, or HIPAA."
+        },
+      ]);
+      return;
+    }
+
+    // Proceed with normal analysis flow
     setViz(null);
     setLoading(true);
     setStepIndex(0);
 
     const totalDelay = 20000 + Math.random() * 10000; // 20–30s
     const stepInterval = Math.floor(totalDelay / steps.length);
-    // Drive a visual loader instead of pushing step messages
     const interval = setInterval(() => {
       setStepIndex(prev => {
         if (prev < steps.length - 1) return prev + 1;
@@ -158,11 +173,13 @@ export default function Summary() {
       const response = [
         "Analysis complete.",
         `High-level view: ${result.scanSummary.passed} passed, ${result.scanSummary.failed} failed, ${result.scanSummary.warnings} warnings.`,
-        `Top risks detected around: ${result.standards
-          .filter(s => s.issues > 0)
-          .slice(0, 2)
-          .map(s => s.name)
-          .join(", ") || "no major standards"}.`,
+        `Top risks detected around: ${
+          result.standards
+            .filter(s => s.issues > 0)
+            .slice(0, 2)
+            .map(s => s.name)
+            .join(", ") || "no major standards"
+        }.`,
         "Updated the left panel with KPIs, charts, and recommendations."
       ].join(" ");
 
