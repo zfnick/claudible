@@ -5,19 +5,27 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { motion } from "framer-motion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function SimpleLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (email.trim() === "test@test.com" && password === "test123") {
+      setError(null);
       toast("Login successful");
       navigate("/dashboard");
     } else {
-      toast("Invalid credentials. Use test@test.com / test123");
+      setError("Invalid email or password.");
+      toast.error("Invalid email or password.", {
+        description: "Please check your credentials and try again.",
+        duration: 4000,
+        className: "bg-rose-600 text-white border-rose-700",
+      });
     }
   };
 
@@ -54,6 +62,13 @@ export default function SimpleLogin() {
                 <CardTitle className="text-xl text-stone-900">Welcome back</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {error ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>Login failed</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                ) : null}
+
                 <div>
                   <label className="text-sm block mb-1 text-stone-800">E-mail:</label>
                   <Input
@@ -62,7 +77,8 @@ export default function SimpleLogin() {
                     placeholder="you@example.com"
                     type="email"
                     required
-                    className="bg-white text-stone-900 placeholder:text-stone-500"
+                    className={`bg-white text-stone-900 placeholder:text-stone-500 ${error ? "border-rose-600 focus-visible:ring-rose-600" : ""}`}
+                    aria-invalid={!!error}
                   />
                 </div>
                 <div>
@@ -73,7 +89,8 @@ export default function SimpleLogin() {
                     placeholder="••••••••"
                     type="password"
                     required
-                    className="bg-white text-stone-900 placeholder:text-stone-500"
+                    className={`bg-white text-stone-900 placeholder:text-stone-500 ${error ? "border-rose-600 focus-visible:ring-rose-600" : ""}`}
+                    aria-invalid={!!error}
                   />
                 </div>
               </CardContent>
