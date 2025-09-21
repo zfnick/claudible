@@ -28,7 +28,7 @@ export default function Landing() {
       </header>
 
       {/* Hero */}
-      <main className="max-w-6xl mx-auto px-6 py-12 flex-1">
+      <main className="max-w-6xl mx-auto px-6 py-6 flex-1 flex items-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
