@@ -115,7 +115,7 @@ Note: The repository contains scaffolding for more advanced capabilities (such a
 
 ## Security & Data
 
-- Session‑only: No data is saved to a database in this demo.
+- Session‑only: No data is saved to a database in this demo
 - No external API calls are performed
 - PDF export is local; nothing is uploaded
 
