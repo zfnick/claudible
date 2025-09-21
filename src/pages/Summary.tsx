@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, SendHorizonal, Download, Shield, AlertTriangle, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
+/* removed Recharts imports */
 
 type Message = { role: "user" | "assistant" | "system"; content: string };
 
@@ -165,14 +165,7 @@ export default function Summary() {
   // Visualization state: start EMPTY until a valid question arrives
   const [viz, setViz] = useState<Viz | null>(null);
 
-  const pieData = useMemo(
-    () => viz ? ([
-      { name: "Passed", value: viz.scanSummary.passed, color: "#10b981" },
-      { name: "Failed", value: viz.scanSummary.failed, color: "#ef4444" },
-      { name: "Warnings", value: viz.scanSummary.warnings, color: "#f59e0b" },
-    ]) : [],
-    [viz]
-  );
+  // removed pieData (Compliance Overview removed)
 
   const steps: Array<string> = [
     "Initializing compliance engine…",
@@ -246,10 +239,7 @@ export default function Summary() {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const barData = useMemo(
-    () => viz ? viz.standards.map(s => ({ name: s.name, issues: s.issues, riskScore: s.riskScore })) : [],
-    [viz]
-  );
+  // removed barData (Issues by Standard removed)
 
   // Derive progress percent for loader
   const progressPercent = Math.min(100, Math.round(((stepIndex + 1) / steps.length) * 100));
@@ -339,63 +329,9 @@ export default function Summary() {
                       ))}
                     </div>
 
-                    {/* Charts */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      <Card className="bg-white/70 border-stone-200">
-                        <CardHeader>
-                          <CardTitle className="text-base text-stone-900">Compliance Overview</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ResponsiveContainer width="100%" height={260}>
-                            <PieChart>
-                              <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value">
-                                {pieData.map((e, i) => (
-                                  <Cell key={i} fill={e.color} />
-                                ))}
-                              </Pie>
-                              <Tooltip />
-                            </PieChart>
-                          </ResponsiveContainer>
-                        </CardContent>
-                      </Card>
-                      <Card className="bg-white/70 border-stone-200">
-                        <CardHeader>
-                          <CardTitle className="text-base text-stone-900">Issues by Standard</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ResponsiveContainer width="100%" height={260}>
-                            <BarChart data={barData}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="name" />
-                              <YAxis />
-                              <Tooltip />
-                              <Bar dataKey="issues" fill="#f59e0b" radius={[6, 6, 0, 0]} />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </CardContent>
-                      </Card>
-                    </div>
+                    {/* Removed Charts: Compliance Overview and Issues by Standard */}
 
-                    {/* New: Weekly Trend line chart */}
-                    <Card className="bg-white/70 border-stone-200">
-                      <CardHeader>
-                        <CardTitle className="text-base text-stone-900">Weekly Trend</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ResponsiveContainer width="100%" height={280}>
-                          <LineChart data={viz.trend}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="day" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="Security" stroke="#10b981" strokeWidth={2} dot={false} />
-                            <Line type="monotone" dataKey="Governance" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                            <Line type="monotone" dataKey="Risk" stroke="#f59e0b" strokeWidth={2} dot={false} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
+                    {/* Removed Weekly Trend */}
 
                     {/* New: Recommended Use Cases (Demo) */}
                     <Card className="bg-white/70 border-stone-200">
