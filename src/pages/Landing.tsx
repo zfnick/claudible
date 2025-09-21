@@ -3,9 +3,9 @@ import { Link } from "react-router";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col">
+    <div className="min-h-screen bg-[#f8f4ec] text-stone-900 flex flex-col">
       {/* Header */}
-      <header className="border-b border-stone-200 bg-white">
+      <header className="border-b border-stone-200 bg-[#f8f4ec]">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
@@ -13,13 +13,13 @@ export default function Landing() {
               alt="Claudible logo"
               className="h-8 w-8 object-contain"
             />
-            <span className="font-semibold tracking-wide text-stone-900">CLAUDIBLE</span>
+            <span className="font-semibold tracking-wide text-[#6b4f2a]">CLAUDIBLE</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="hidden sm:block text-sm text-stone-500">Already have an account?</span>
+            <span className="hidden sm:block text-sm text-stone-700">Already have an account?</span>
             <Link
               to="/login"
-              className="px-4 py-1.5 rounded-full bg-amber-200/60 hover:bg-amber-200 text-stone-900 text-sm border border-stone-300"
+              className="px-4 py-1.5 rounded-full bg-[#7b5a36] hover:bg-[#6b4f2a] text-white text-sm border border-[#6b4f2a]/30 transition-colors"
             >
               Login
             </Link>
@@ -36,7 +36,7 @@ export default function Landing() {
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
-            <h1 className="text-5xl md:text-6xl tracking-tight font-bold text-stone-900">
+            <h1 className="font-serif text-5xl md:text-6xl tracking-tight font-bold text-[#6b4f2a]">
               Is Your Cloud
               <span className="block">Audit-Ready?</span>
             </h1>
@@ -46,7 +46,7 @@ export default function Landing() {
             </p>
             <Link
               to="/providers"
-              className="inline-flex items-center rounded-md bg-amber-200/60 hover:bg-amber-200 text-stone-900 px-6 py-3 font-semibold transition-colors border border-stone-300"
+              className="inline-flex items-center rounded-md bg-[#7b5a36] hover:bg-[#6b4f2a] text-white px-6 py-3 font-semibold tracking-wide uppercase transition-colors border border-[#6b4f2a]/30 shadow-sm"
             >
               START NOW
             </Link>
@@ -56,35 +56,35 @@ export default function Landing() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-6 place-items-center"
+            className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-8 place-items-center"
           >
             <img
               src="https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg"
               alt="AWS"
-              className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
+              className="h-24 w-auto bg-white rounded-md p-4 border border-stone-200 shadow-sm"
             />
             <img
               src="https://www.vectorlogo.zone/logos/microsoft_azure/microsoft_azure-icon.svg"
               alt="Azure"
-              className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
+              className="h-24 w-auto bg-white rounded-md p-4 border border-stone-200 shadow-sm"
             />
             <img
               src="https://www.vectorlogo.zone/logos/alibabacloud/alibabacloud-icon.svg"
               alt="Alibaba Cloud"
-              className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
+              className="h-24 w-auto bg-white rounded-md p-4 border border-stone-200 shadow-sm"
             />
             <img
               src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg"
               alt="Google Cloud"
-              className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
+              className="h-24 w-auto bg-white rounded-md p-4 border border-stone-200 shadow-sm"
             />
           </motion.div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-stone-200 bg-white mt-auto">
-        <div className="max-w-6xl mx-auto px-6 py-4 text-sm text-stone-500">
+      <footer className="border-t border-stone-200 bg-[#f8f4ec] mt-auto">
+        <div className="max-w-6xl mx-auto px-6 py-4 text-sm text-stone-600">
           2026 Claudible. All rights reserved.
         </div>
       </footer>
