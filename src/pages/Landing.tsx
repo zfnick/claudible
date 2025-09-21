@@ -19,7 +19,7 @@ export default function Landing() {
             <span className="hidden sm:block text-sm text-stone-500">Already have an account?</span>
             <Link
               to="/login"
-              className="px-4 py-1.5 rounded-full bg-stone-700 text-stone-50 text-sm"
+              className="px-4 py-1.5 rounded-full bg-amber-200/60 hover:bg-amber-200 text-stone-900 text-sm border border-stone-300"
             >
               Login
             </Link>
@@ -46,7 +46,7 @@ export default function Landing() {
             </p>
             <Link
               to="/providers"
-              className="inline-flex items-center rounded-md bg-stone-700 hover:bg-stone-800 text-stone-50 px-6 py-3 font-semibold transition-colors"
+              className="inline-flex items-center rounded-md bg-amber-200/60 hover:bg-amber-200 text-stone-900 px-6 py-3 font-semibold transition-colors border border-stone-300"
             >
               START NOW
             </Link>
