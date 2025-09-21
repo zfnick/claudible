@@ -3,7 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Shield, Scan, Zap, Lock, CheckCircle, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { Link } from "react-router";
 
 interface ComplianceLandingProps {
   onStartScan: (prompt: string) => void;
@@ -12,6 +13,7 @@ interface ComplianceLandingProps {
 export default function ComplianceLanding({ onStartScan }: ComplianceLandingProps) {
   const [prompt, setPrompt] = useState("");
   const [isScanning, setIsScanning] = useState(false);
+  const scanInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleScan = () => {
     if (!prompt.trim()) return;
@@ -22,6 +24,13 @@ export default function ComplianceLanding({ onStartScan }: ComplianceLandingProp
       onStartScan(prompt);
       setIsScanning(false);
     }, 2000);
+  };
+
+  const scrollToScan = () => {
+    const el = document.getElementById("scan-section");
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // focus input after scroll
+    setTimeout(() => scanInputRef.current?.focus(), 400);
   };
 
   const features = [
@@ -56,6 +65,32 @@ export default function ComplianceLanding({ onStartScan }: ComplianceLandingProp
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Header - light, minimal, with login */}
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 border-b border-white/10 bg-white/5 backdrop-blur-sm"
+      >
+        <div className="flex items-center justify-between max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="p-1.5 bg-white/70 rounded-md">
+              <Shield className="h-5 w-5 text-amber-800" />
+            </div>
+            <span className="text-lg font-semibold tracking-wide text-amber-200">CLAUDIBLE</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-white/70 hidden sm:inline">Already have an account?</span>
+            <Link
+              to="/auth"
+              className="px-4 py-2 rounded-full bg-amber-900/80 hover:bg-amber-900 text-amber-100 border border-white/10 transition-colors"
+            >
+              Login
+            </Link>
+          </div>
+        </div>
+      </motion.header>
+
       {/* Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
@@ -63,51 +98,59 @@ export default function ComplianceLanding({ onStartScan }: ComplianceLandingProp
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="relative z-10 p-6"
-      >
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 backdrop-blur-md rounded-lg border border-white/20">
-              <Shield className="h-8 w-8 text-blue-400" />
-            </div>
-            <h1 className="text-2xl font-bold text-white">ComplianceAI</h1>
-          </div>
-          <Button 
-            variant="outline" 
-            className="bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md text-white"
-          >
-            Documentation
-          </Button>
-        </div>
-      </motion.header>
-
       {/* Main Content */}
       <main className="flex-1 relative z-10">
         <div className="max-w-7xl mx-auto px-6 py-12">
-          {/* Hero Section */}
+
+          {/* New Hero Section to match reference */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="mb-16 rounded-xl border border-white/10 bg-amber-50/90 text-stone-800 shadow-2xl"
           >
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-              AI-Enhanced
-              <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                Compliance Audit
-              </span>
-              Assistant
-            </h1>
-            <p className="text-xl text-white/70 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Streamline your compliance audits with AI-powered analysis. 
-              Get instant insights, risk assessments, and actionable recommendations 
-              for multiple compliance standards.
-            </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 lg:p-12">
+              <div className="space-y-6">
+                <h1 className="text-5xl md:text-6xl tracking-tight font-bold">
+                  Is Your Cloud
+                  <span className="block">Audit-Ready?</span>
+                </h1>
+                <p className="text-lg text-stone-700">
+                  Auditing compliance is time consuming, not beginner friendly and not cost effective.
+                  Claudible aims to mitigate these challenges and ensure your cloud providers are audit ready.
+                </p>
+                <button
+                  onClick={scrollToScan}
+                  className="inline-flex items-center rounded-md bg-stone-700 hover:bg-stone-800 text-amber-50 px-6 py-3 font-semibold transition-colors"
+                >
+                  START NOW
+                </button>
+              </div>
+
+              {/* Provider logos */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-6 place-items-center">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg"
+                  alt="AWS"
+                  className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
+                />
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg"
+                  alt="Azure"
+                  className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
+                />
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Google_Cloud_logo.svg"
+                  alt="Google Cloud"
+                  className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
+                />
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Alibaba_Cloud_logo.svg"
+                  alt="Alibaba Cloud"
+                  className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
+                />
+              </div>
+            </div>
           </motion.div>
 
           {/* Scan Interface */}
@@ -116,6 +159,7 @@ export default function ComplianceLanding({ onStartScan }: ComplianceLandingProp
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="mb-16"
+            id="scan-section"
           >
             <Card className="max-w-4xl mx-auto bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl">
               <CardContent className="p-8">
@@ -128,6 +172,7 @@ export default function ComplianceLanding({ onStartScan }: ComplianceLandingProp
                   <div className="flex gap-4">
                     <div className="flex-1">
                       <Input
+                        ref={scanInputRef}
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                         placeholder="e.g., Check AWS Security Compliance for ISO 27001"
@@ -138,7 +183,7 @@ export default function ComplianceLanding({ onStartScan }: ComplianceLandingProp
                     <Button
                       onClick={handleScan}
                       disabled={!prompt.trim() || isScanning}
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 h-14 text-lg font-semibold shadow-lg"
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 h-14 text-lg font-semibold"
                     >
                       {isScanning ? (
                         <>
