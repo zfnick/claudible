@@ -719,6 +719,21 @@ export default function Summary() {
     URL.revokeObjectURL(url);
   };
 
+  // Add counts based on use cases severity and a sorted list by severity
+  const counts = useMemo(() => {
+    const list = viz?.useCases ?? [];
+    const critical = list.filter((u) => u.severity === "High").length;
+    const medium = list.filter((u) => u.severity === "Medium").length;
+    const compliant = list.filter((u) => u.severity === "Low").length;
+    return { critical, medium, compliant };
+  }, [viz]);
+
+  const sortedUseCases = useMemo(() => {
+    if (!viz?.useCases) return [];
+    const order: Record<"High" | "Medium" | "Low", number> = { High: 0, Medium: 1, Low: 2 };
+    return [...viz.useCases].sort((a, b) => order[a.severity] - order[b.severity]);
+  }, [viz]);
+
   return (
     <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900">
       {/* Header */}
@@ -779,54 +794,41 @@ export default function Summary() {
                 {/* Render visualizations when ready */}
                 {!viz ? null : (
                   <>
-                    {/* KPI pills: Security, Governance, Risk */}
+                    {/* KPI pills: now show counts from use cases by severity */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      {viz.summary.map((s, idx) => (
-                        <div key={idx} className="flex items-center gap-3 bg-white/60 border border-stone-200 rounded-xl p-4">
-                          <s.icon className={`h-5 w-5 ${s.color}`} />
-                          <div className="flex-1">
-                            <div className="text-sm text-stone-600">{s.label}</div>
-                            <div className="font-semibold">{s.percent}%</div>
-                          </div>
-                          <Badge className="bg-stone-800 text-stone-100">{s.percent}%</Badge>
+                      <div className="flex items-center gap-3 bg-white/60 border border-stone-200 rounded-xl p-4">
+                        <AlertTriangle className="h-5 w-5 text-rose-600" />
+                        <div className="flex-1">
+                          <div className="text-sm text-stone-600">Critical Issues</div>
+                          <div className="font-semibold">{counts.critical}</div>
                         </div>
-                      ))}
+                        <Badge className="bg-stone-800 text-stone-100">{counts.critical}</Badge>
+                      </div>
+                      <div className="flex items-center gap-3 bg-white/60 border border-stone-200 rounded-xl p-4">
+                        <Shield className="h-5 w-5 text-amber-600" />
+                        <div className="flex-1">
+                          <div className="text-sm text-stone-600">Medium Risks</div>
+                          <div className="font-semibold">{counts.medium}</div>
+                        </div>
+                        <Badge className="bg-stone-800 text-stone-100">{counts.medium}</Badge>
+                      </div>
+                      <div className="flex items-center gap-3 bg-white/60 border border-stone-200 rounded-xl p-4">
+                        <CheckCircle className="h-5 w-5 text-emerald-600" />
+                        <div className="flex-1">
+                          <div className="text-sm text-stone-600">Compliant</div>
+                          <div className="font-semibold">{counts.compliant}</div>
+                        </div>
+                        <Badge className="bg-stone-800 text-stone-100">{counts.compliant}</Badge>
+                      </div>
                     </div>
 
-                    {/* NEW: High-level view counts (Passed / Failed / Warnings) */}
-                    <Card className="bg-white/70 border-stone-200">
-                      <CardHeader>
-                        <CardTitle className="text-base text-stone-900">High-level view</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 border-emerald-200">
-                            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                            {viz.scanSummary.passed} Passed
-                          </span>
-                          <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-rose-100 text-rose-700 border-rose-200">
-                            <span className="h-2 w-2 rounded-full bg-rose-500" />
-                            {viz.scanSummary.failed} Failed
-                          </span>
-                          <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-amber-100 text-amber-800 border-amber-200">
-                            <span className="h-2 w-2 rounded-full bg-amber-500" />
-                            {viz.scanSummary.warnings} Warnings
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Removed Charts: Compliance Overview and Issues by Standard */}
-
-                    {/* Removed Weekly Trend */}
-
-                    {/* New: Recommended Use Cases (Demo) renamed to Latest Scan Results already */}
+                    {/* Latest Scan Results: now sorted by severity */}
                     <Card className="bg-white/70 border-stone-200">
                       <CardHeader>
                         <CardTitle className="text-base text-stone-900">Latest Scan Results</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {viz.useCases?.map((uc, i) => (
+                        {sortedUseCases.map((uc, i) => (
                           <div
                             key={i}
                             className="rounded-xl border border-stone-200 bg-white/60 p-4"
