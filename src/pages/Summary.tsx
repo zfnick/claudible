@@ -336,7 +336,7 @@ export default function Summary() {
                     {/* New: Recommended Use Cases (Demo) */}
                     <Card className="bg-white/70 border-stone-200">
                       <CardHeader>
-                        <CardTitle className="text-base text-stone-900">Recommended Use Cases (Demo)</CardTitle>
+                        <CardTitle className="text-base text-stone-900">Latest Scan Results</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         {viz.useCases?.map((uc, i) => (
