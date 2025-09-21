@@ -359,15 +359,24 @@ export default function Summary() {
                 {loading && (
                   <div className="border rounded-2xl bg-amber-50 text-stone-900 border-stone-300 p-4">
                     <div className="mb-2 text-sm font-medium">Analyzing your request…</div>
+                    
+                    <div className="flex items-center justify-between mb-1 text-xs text-stone-600">
+                      <span>Progress</span>
+                      <span className="font-semibold">{progressPercent}%</span>
+                    </div>
+
                     <Progress value={progressPercent} className="h-2 mb-3" />
+
                     <ul className="space-y-1 text-sm">
                       {steps.map((s, i) => (
                         <li key={i} className={`flex items-center gap-2 ${i <= stepIndex ? "text-stone-900" : "text-stone-400"}`}>
-                          <span
-                            className={`h-2 w-2 rounded-full ${
-                              i < stepIndex ? "bg-emerald-500" : i === stepIndex ? "bg-amber-500 animate-pulse" : "bg-stone-300"
-                            }`}
-                          />
+                          {i < stepIndex ? (
+                            <span className="inline-flex items-center justify-center h-3 w-3 rounded-full bg-emerald-500" />
+                          ) : i === stepIndex ? (
+                            <Loader2 className="h-3 w-3 text-amber-600 animate-spin" />
+                          ) : (
+                            <span className="h-3 w-3 rounded-full border border-stone-300" />
+                          )}
                           {s}
                         </li>
                       ))}
