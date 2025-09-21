@@ -31,9 +31,9 @@ export default function SimpleLogin() {
               alt="Claudible logo"
               className="h-8 w-8 object-contain"
             />
-            <span className="font-semibold tracking-wide">CLAUDIBLE</span>
+            <span className="font-semibold tracking-wide text-stone-900">CLAUDIBLE</span>
           </div>
-          <Link to="/" className="text-sm underline">Home</Link>
+          <Link to="/" className="text-sm underline text-stone-700">Home</Link>
         </div>
       </header>
 
@@ -51,33 +51,35 @@ export default function SimpleLogin() {
           <Card className="w-full max-w-md bg-amber-200/60 border-stone-300">
             <form onSubmit={handleSubmit}>
               <CardHeader>
-                <CardTitle className="text-xl">Welcome back</CardTitle>
-                <CardDescription>Use test@test.com / test123</CardDescription>
+                <CardTitle className="text-xl text-stone-900">Welcome back</CardTitle>
+                <CardDescription className="text-stone-700">Use test@test.com / test123</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm block mb-1">E-mail:</label>
+                  <label className="text-sm block mb-1 text-stone-800">E-mail:</label>
                   <Input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     type="email"
                     required
+                    className="bg-white text-stone-900 placeholder:text-stone-500"
                   />
                 </div>
                 <div>
-                  <label className="text-sm block mb-1">Password:</label>
+                  <label className="text-sm block mb-1 text-stone-800">Password:</label>
                   <Input
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     type="password"
                     required
+                    className="bg-white text-stone-900 placeholder:text-stone-500"
                   />
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Link to="/" className="text-sm underline">Cancel</Link>
+                <Link to="/" className="text-sm underline text-stone-700">Cancel</Link>
                 <Button type="submit" className="bg-stone-700 hover:bg-stone-800">Login</Button>
               </CardFooter>
             </form>
