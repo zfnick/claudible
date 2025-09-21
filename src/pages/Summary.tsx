@@ -203,7 +203,7 @@ export default function Summary() {
           >
             <Card className="bg-amber-200/60 border-stone-300 h-[78vh] flex flex-col overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between shrink-0">
-                <CardTitle className="text-3xl tracking-tight">Summary</CardTitle>
+                <CardTitle className="text-3xl tracking-tight text-stone-900">Summary</CardTitle>
                 <Button
                   variant="outline"
                   onClick={downloadReport}
