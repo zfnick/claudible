@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, SendHorizonal, Shield, AlertTriangle, CheckCircle } from "lucide-react";
+import { Loader2, SendHorizonal, Shield, AlertTriangle, CheckCircle, ChevronDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 /* removed Recharts imports */
 
@@ -621,15 +620,7 @@ export default function Summary() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [selectedUC, setSelectedUC] = useState<null | {
-    service: string;
-    title: string;
-    explanation: string;
-    frameworks: Array<string>;
-    remediation: Array<string>;
-    severity: "High" | "Medium" | "Low";
-  }>(null);
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
 
   // New: refs to keep each step chip for auto-scrolling in single-line indicator
   const stepRefs = useRef<Array<HTMLSpanElement | null>>([]);
@@ -872,53 +863,51 @@ export default function Summary() {
                         <CardTitle className="text-base text-stone-900">Latest Scan Results</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {sortedUseCases.map((uc, i) => (
-                          <div
-                            key={i}
-                            className="rounded-xl border border-stone-200 bg-white/60 p-4 hover:bg-white cursor-pointer transition-colors"
-                            onClick={() => {
-                              setSelectedUC(uc);
-                              setDetailsOpen(true);
-                            }}
-                          >
-                            <div className="flex items-center justify-between gap-3 mb-2">
-                              <div className="flex items-center gap-2">
-                                <Badge className="bg-stone-800 text-stone-100">{uc.service}</Badge>
-                                <span
-                                  className={`text-xs rounded-full border px-2 py-0.5 ${
-                                    uc.severity === "High"
-                                      ? "bg-rose-100 text-rose-700 border-rose-200"
-                                      : uc.severity === "Medium"
-                                        ? "bg-amber-100 text-amber-800 border-amber-200"
-                                        : "bg-emerald-100 text-emerald-700 border-emerald-200"
-                                  }`}
-                                >
-                                  {uc.severity} Severity
-                                </span>
-                              </div>
+                        {sortedUseCases.map((uc, i) => {
+                          const isOpen = !!expanded[i];
+                          return (
+                            <div
+                              key={i}
+                              className="rounded-xl border border-stone-200 bg-white/60 hover:bg-white transition-colors"
+                            >
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpanded((prev) => ({ ...prev, [i]: !prev[i] }))
+                                }
+                                className="w-full p-4 flex items-start justify-between gap-3 text-left"
+                              >
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Badge className="bg-stone-800 text-stone-100">{uc.service}</Badge>
+                                    <span
+                                      className={`text-xs rounded-full border px-2 py-0.5 ${
+                                        uc.severity === "High"
+                                          ? "bg-rose-100 text-rose-700 border-rose-200"
+                                          : uc.severity === "Medium"
+                                          ? "bg-amber-100 text-amber-800 border-amber-200"
+                                          : "bg-emerald-100 text-emerald-700 border-emerald-200"
+                                      }`}
+                                    >
+                                      {uc.severity} Severity
+                                    </span>
+                                  </div>
+                                  <div className="font-semibold text-stone-900">{uc.title}</div>
+                                </div>
+                                <ChevronDown
+                                  className={`h-5 w-5 text-stone-700 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                                />
+                              </button>
+
+                              {isOpen ? (
+                                <div className="px-4 pb-4">
+                                  <p className="text-sm text-stone-700">{uc.explanation}</p>
+                                  {/* Intentionally do NOT render frameworks or remediation here per request */}
+                                </div>
+                              ) : null}
                             </div>
-                            <div className="font-semibold text-stone-900 mb-1">{uc.title}</div>
-                            <p className="text-sm text-stone-700 mb-3">{uc.explanation}</p>
-                            <div className="flex flex-wrap gap-2 mb-3">
-                              {uc.frameworks.map((fw) => (
-                                <span
-                                  key={fw}
-                                  className="text-xs rounded-full border px-2 py-0.5 bg-stone-100 text-stone-800 border-stone-200"
-                                >
-                                  {fw}
-                                </span>
-                              ))}
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-stone-800 mb-1">What should you do</div>
-                              <ul className="list-disc pl-5 space-y-1 text-sm text-stone-800">
-                                {uc.remediation.map((r, idx) => (
-                                  <li key={idx}>{r}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </CardContent>
                     </Card>
 
@@ -1044,67 +1033,6 @@ export default function Summary() {
           2026 Claudible. All rights reserved.
         </div>
       </footer>
-
-      <Dialog open={detailsOpen} onOpenChange={(open) => {
-        setDetailsOpen(open);
-        if (!open) setSelectedUC(null);
-      }}>
-        <DialogContent className="bg-white text-stone-900 border-stone-300">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {selectedUC ? (
-                <>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="text-xs rounded-full border px-2 py-0.5 bg-stone-800 text-stone-100 border-stone-700">
-                      {selectedUC.service}
-                    </span>
-                    <span
-                      className={`text-xs rounded-full border px-2 py-0.5 ${
-                        selectedUC.severity === "High"
-                          ? "bg-rose-100 text-rose-700 border-rose-200"
-                          : selectedUC.severity === "Medium"
-                            ? "bg-amber-100 text-amber-800 border-amber-200"
-                            : "bg-emerald-100 text-emerald-700 border-emerald-200"
-                      }`}
-                    >
-                      {selectedUC.severity} Severity
-                    </span>
-                  </span>
-                  <span className="sr-only"> • </span>
-                </>
-              ) : null}
-              <span>{selectedUC?.title ?? "Details"}</span>
-            </DialogTitle>
-            <DialogDescription className="text-stone-700">
-              {selectedUC?.explanation}
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedUC && (
-            <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {selectedUC.frameworks.map((fw) => (
-                  <span
-                    key={fw}
-                    className="text-xs rounded-full border px-2 py-0.5 bg-stone-100 text-stone-800 border-stone-200"
-                  >
-                    {fw}
-                  </span>
-                ))}
-              </div>
-
-              <div>
-                <div className="text-sm font-medium text-stone-800 mb-1">What should you do</div>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-stone-800">
-                  {selectedUC.remediation.map((r, idx) => (
-                    <li key={idx}>{r}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
