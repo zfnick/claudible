@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, SendHorizonal, Shield, AlertTriangle, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 /* removed Recharts imports */
@@ -620,6 +621,15 @@ export default function Summary() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [selectedUC, setSelectedUC] = useState<null | {
+    service: string;
+    title: string;
+    explanation: string;
+    frameworks: Array<string>;
+    remediation: Array<string>;
+    severity: "High" | "Medium" | "Low";
+  }>(null);
 
   // New: refs to keep each step chip for auto-scrolling in single-line indicator
   const stepRefs = useRef<Array<HTMLSpanElement | null>>([]);
@@ -874,7 +884,11 @@ export default function Summary() {
                         {sortedUseCases.map((uc, i) => (
                           <div
                             key={i}
-                            className="rounded-xl border border-stone-200 bg-white/60 p-4"
+                            className="rounded-xl border border-stone-200 bg-white/60 p-4 hover:bg-white cursor-pointer transition-colors"
+                            onClick={() => {
+                              setSelectedUC(uc);
+                              setDetailsOpen(true);
+                            }}
                           >
                             <div className="flex items-center justify-between gap-3 mb-2">
                               <div className="flex items-center gap-2">
@@ -1039,6 +1053,67 @@ export default function Summary() {
           2026 Claudible. All rights reserved.
         </div>
       </footer>
+
+      <Dialog open={detailsOpen} onOpenChange={(open) => {
+        setDetailsOpen(open);
+        if (!open) setSelectedUC(null);
+      }}>
+        <DialogContent className="bg-white text-stone-900 border-stone-300">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedUC ? (
+                <>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="text-xs rounded-full border px-2 py-0.5 bg-stone-800 text-stone-100 border-stone-700">
+                      {selectedUC.service}
+                    </span>
+                    <span
+                      className={`text-xs rounded-full border px-2 py-0.5 ${
+                        selectedUC.severity === "High"
+                          ? "bg-rose-100 text-rose-700 border-rose-200"
+                          : selectedUC.severity === "Medium"
+                            ? "bg-amber-100 text-amber-800 border-amber-200"
+                            : "bg-emerald-100 text-emerald-700 border-emerald-200"
+                      }`}
+                    >
+                      {selectedUC.severity} Severity
+                    </span>
+                  </span>
+                  <span className="sr-only"> • </span>
+                </>
+              ) : null}
+              <span>{selectedUC?.title ?? "Details"}</span>
+            </DialogTitle>
+            <DialogDescription className="text-stone-700">
+              {selectedUC?.explanation}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedUC && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                {selectedUC.frameworks.map((fw) => (
+                  <span
+                    key={fw}
+                    className="text-xs rounded-full border px-2 py-0.5 bg-stone-100 text-stone-800 border-stone-200"
+                  >
+                    {fw}
+                  </span>
+                ))}
+              </div>
+
+              <div>
+                <div className="text-sm font-medium text-stone-800 mb-1">What should you do</div>
+                <ul className="list-disc pl-5 space-y-1 text-sm text-stone-800">
+                  {selectedUC.remediation.map((r, idx) => (
+                    <li key={idx}>{r}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
