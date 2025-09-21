@@ -10,6 +10,9 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 import Landing from "./pages/Landing.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import SimpleLogin from "@/pages/SimpleLogin.tsx";
+import ProviderSelect from "@/pages/ProviderSelect.tsx";
+import BeforeStart from "@/pages/BeforeStart.tsx";
 import "./types/global.d.ts";
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
@@ -49,6 +52,9 @@ createRoot(document.getElementById("root")!).render(
           <RouteSyncer />
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<SimpleLogin />} />
+            <Route path="/providers" element={<ProviderSelect />} />
+            <Route path="/before-start/:provider" element={<BeforeStart />} />
             <Route path="/auth" element={<AuthPage redirectAfterAuth="/" />} /> {/* TODO: change redirect after auth to correct page */}
             <Route path="*" element={<NotFound />} />
           </Routes>
