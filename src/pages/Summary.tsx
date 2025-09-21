@@ -958,7 +958,7 @@ export default function Summary() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-6 flex-1">
+      <main className="max-w-7xl mx-auto px-6 py-6 flex-1 grid place-items-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left: Visualization (fixed height + scrollable; initially empty) */}
           <motion.div
@@ -996,7 +996,9 @@ export default function Summary() {
                     {/* KPI pills: now show counts from use cases by severity */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="flex items-center gap-3 bg-white/60 border border-stone-200 rounded-xl p-4">
-                        <AlertTriangle className="h-5 w-5 text-rose-600" />
+                        <span className="h-9 w-9 grid place-items-center rounded-full border border-rose-200 bg-rose-100 shadow-sm">
+  <AlertTriangle className="h-4 w-4 text-rose-700" />
+</span>
                         <div className="flex-1">
                           <div className="text-sm text-stone-600">Critical Issues</div>
                           <div className="font-semibold">{counts.critical}</div>
@@ -1004,7 +1006,9 @@ export default function Summary() {
                         <Badge className="bg-stone-800 text-stone-100">{counts.critical}</Badge>
                       </div>
                       <div className="flex items-center gap-3 bg-white/60 border border-stone-200 rounded-xl p-4">
-                        <Shield className="h-5 w-5 text-amber-600" />
+                        <span className="h-9 w-9 grid place-items-center rounded-full border border-amber-200 bg-amber-100 shadow-sm">
+  <Shield className="h-4 w-4 text-amber-700" />
+</span>
                         <div className="flex-1">
                           <div className="text-sm text-stone-600">Medium Risks</div>
                           <div className="font-semibold">{counts.medium}</div>
@@ -1012,7 +1016,9 @@ export default function Summary() {
                         <Badge className="bg-stone-800 text-stone-100">{counts.medium}</Badge>
                       </div>
                       <div className="flex items-center gap-3 bg-white/60 border border-stone-200 rounded-xl p-4">
-                        <CheckCircle className="h-5 w-5 text-emerald-600" />
+                        <span className="h-9 w-9 grid place-items-center rounded-full border border-emerald-200 bg-emerald-100 shadow-sm">
+  <CheckCircle className="h-4 w-4 text-emerald-700" />
+</span>
                         <div className="flex-1">
                           <div className="text-sm text-stone-600">Compliant</div>
                           <div className="font-semibold">{counts.compliant}</div>
@@ -1101,9 +1107,9 @@ export default function Summary() {
                                   </div>
                                   <div className="font-semibold text-stone-900">{uc.title}</div>
                                 </div>
-                                <ChevronDown
-                                  className={`h-5 w-5 text-stone-700 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                                />
+<ChevronDown
+  className={`h-5 w-5 text-stone-700 transition-transform ${isOpen ? "rotate-180" : ""} p-1 rounded-full bg-stone-100 border border-stone-200`}
+/>
                               </button>
 
                               {isOpen ? (
