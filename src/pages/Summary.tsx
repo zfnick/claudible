@@ -610,6 +610,9 @@ function extractHighLevelStats(text: string) {
   };
 }
 
+// Temporary no-op to prevent runtime crashes if any stale <Download /> remains
+const Download = () => null;
+
 export default function Summary() {
   const [messages, setMessages] = useState<Array<Message>>([
     { role: "assistant", content: "Hi, need any security/compliance insights? Ask me anything about audits, risks, or controls." }
