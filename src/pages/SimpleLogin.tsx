@@ -15,7 +15,7 @@ export default function SimpleLogin() {
     e.preventDefault();
     if (email.trim() === "test@test.com" && password === "test123") {
       toast("Login successful");
-      navigate("/providers");
+      navigate("/dashboard");
     } else {
       toast("Invalid credentials. Use test@test.com / test123");
     }
