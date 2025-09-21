@@ -436,40 +436,22 @@ export default function Summary() {
 
                     <Progress value={progressPercent} className="h-2 mb-3" />
 
-                    {/* Single-line animated step indicator */}
+                    {/* Single-line animated step indicator (completed collapse into ticks, only current step shown) */}
                     <div className="relative overflow-x-auto whitespace-nowrap no-scrollbar">
                       <div className="inline-flex items-center gap-3 pr-2">
-                        {steps.map((s, i) => {
-                          const state =
-                            i < stepIndex ? "done"
-                            : i === stepIndex ? "current"
-                            : "pending";
+                        {/* Completed steps as ticks */}
+                        {Array.from({ length: stepIndex }).map((_, i) => (
+                          <CheckCircle key={i} className="h-3.5 w-3.5 text-emerald-600" />
+                        ))}
 
-                          return (
-                            <span
-                              key={i}
-                              ref={(el) => { stepRefs.current[i] = el; }}
-                              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs ${
-                                state === "done"
-                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                  : state === "current"
-                                  ? "bg-amber-50 text-amber-800 border-amber-200"
-                                  : "bg-white text-stone-500 border-stone-200"
-                              }`}
-                            >
-                              {state === "done" ? (
-                                <span className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-emerald-500">
-                                  <span className="h-2 w-2 bg-white rounded-full" />
-                                </span>
-                              ) : state === "current" ? (
-                                <Loader2 className="h-3.5 w-3.5 text-amber-600 animate-spin" />
-                              ) : (
-                                <span className="h-3.5 w-3.5 rounded-full border border-stone-300" />
-                              )}
-                              <span className={`${state === "current" ? "animate-pulse" : ""}`}>{s}</span>
-                            </span>
-                          );
-                        })}
+                        {/* Current step chip with spinner */}
+                        <span
+                          ref={(el) => { stepRefs.current[stepIndex] = el; }}
+                          className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs bg-amber-50 text-amber-800 border-amber-200"
+                        >
+                          <Loader2 className="h-3.5 w-3.5 text-amber-600 animate-spin" />
+                          <span className="animate-pulse">{steps[stepIndex]}</span>
+                        </span>
                       </div>
                     </div>
                   </div>
