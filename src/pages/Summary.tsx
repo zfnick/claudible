@@ -648,6 +648,58 @@ export default function Summary() {
     "Preparing visualizations and remediation guidance…"
   ];
 
+  // Add: timer ref to control typing animation intervals
+  const typingTimerRef = useRef<number | null>(null);
+
+  // Add: helper to stream assistant replies naturally
+  const typeOut = (fullText: string) => {
+    // clear any existing typing timer
+    if (typingTimerRef.current) {
+      window.clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+
+    // push an empty assistant message which we will fill as we "type"
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+    let i = 0;
+    const step = 2; // characters per tick
+    const intervalMs = 12; // speed of typing
+
+    typingTimerRef.current = window.setInterval(() => {
+      i += step;
+      setMessages((prev) => {
+        if (prev.length === 0) return prev;
+        const lastIndex = prev.length - 1;
+        const last = prev[lastIndex];
+        if (!last || last.role !== "assistant") return prev;
+
+        const updated = [...prev];
+        updated[lastIndex] = { ...last, content: fullText.slice(0, i) };
+        return updated;
+      });
+
+      if (i >= fullText.length) {
+        if (typingTimerRef.current) {
+          window.clearInterval(typingTimerRef.current);
+          typingTimerRef.current = null;
+        }
+      }
+    }, intervalMs);
+  };
+
+  // Ensure typing timer is cleaned up on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimerRef.current) {
+        window.clearInterval(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  // removed barData (Issues by Standard removed)
+
   const send = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
@@ -716,14 +768,10 @@ export default function Summary() {
               .join("\n- ")}`
           : "";
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            `Here are the top risks detected in your latest analysis:\n${bullets}${nextSteps}\n\nWould you like me to dive deeper into any specific issue or standard?`,
-        },
-      ]);
+      // Replace immediate push with natural typing animation
+      typeOut(
+        `Here are the top risks detected in your latest analysis:\n${bullets}${nextSteps}\n\nWould you like me to dive deeper into any specific issue or standard?`,
+      );
       return;
     }
 
@@ -746,11 +794,12 @@ export default function Summary() {
       const result = generateMockAnalysis(trimmed);
       setViz(result);
 
-      // Completion message
+      // Completion message (now typed out)
       const response =
         "Analysis Completed. Your compliance audit summary has been generated. Do you need further explanation?";
 
-      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
+      // Replace immediate push with natural typing animation
+      typeOut(response);
       setLoading(false);
     }, totalDelay);
   };
@@ -1019,7 +1068,13 @@ export default function Summary() {
                   const isUser = m.role === "user";
                   const stats = !isUser ? extractHighLevelStats(m.content) : null;
                   return (
-                    <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                    >
                       <div
                         className={`max-w-[80%] px-4 py-2 rounded-2xl border whitespace-pre-wrap ${
                           isUser
@@ -1029,10 +1084,7 @@ export default function Summary() {
                       >
                         {stats ? (
                           <>
-                            {/* Remaining assistant text without the High-level view sentence */}
                             {stats.rest && <div>{stats.rest}</div>}
-
-                            {/* Pretty pills for High-level stats */}
                             <div className={`mt-2 flex flex-wrap items-center gap-2 ${stats.rest ? "" : ""}`}>
                               <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 border-emerald-200">
                                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
@@ -1052,7 +1104,7 @@ export default function Summary() {
                           m.content
                         )}
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
 
