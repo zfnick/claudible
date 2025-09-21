@@ -77,7 +77,7 @@ export default function SimpleLogin() {
                   />
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between">
+              <CardFooter className="flex justify-between mt-3 pt-2">
                 <Link to="/" className="text-sm underline text-stone-700">Cancel</Link>
                 <Button type="submit" className="bg-stone-700 hover:bg-stone-800">Login</Button>
               </CardFooter>
