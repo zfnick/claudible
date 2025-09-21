@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -105,6 +105,15 @@ export default function Summary() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+
+  // New: refs to keep each step chip for auto-scrolling in single-line indicator
+  const stepRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  useEffect(() => {
+    const el = stepRefs.current[stepIndex];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [stepIndex]);
 
   // Visualization state: start EMPTY until a valid question arrives
   const [viz, setViz] = useState<Viz | null>(null);
@@ -419,7 +428,7 @@ export default function Summary() {
                 {loading && (
                   <div className="border rounded-2xl bg-white/60 backdrop-blur-sm text-stone-900 border-stone-300 p-4 shadow-sm">
                     <div className="mb-2 text-sm font-medium">Analyzing your request…</div>
-                    
+
                     <div className="flex items-center justify-between mb-1 text-xs text-stone-600">
                       <span>Progress</span>
                       <span className="font-semibold">{progressPercent}%</span>
@@ -427,20 +436,42 @@ export default function Summary() {
 
                     <Progress value={progressPercent} className="h-2 mb-3" />
 
-                    <ul className="space-y-1 text-sm">
-                      {steps.map((s, i) => (
-                        <li key={i} className={`flex items-center gap-2 ${i <= stepIndex ? "text-stone-900" : "text-stone-400"}`}>
-                          {i < stepIndex ? (
-                            <span className="inline-flex items-center justify-center h-3 w-3 rounded-full bg-emerald-500" />
-                          ) : i === stepIndex ? (
-                            <Loader2 className="h-3 w-3 text-amber-600 animate-spin" />
-                          ) : (
-                            <span className="h-3 w-3 rounded-full border border-stone-300" />
-                          )}
-                          {s}
-                        </li>
-                      ))}
-                    </ul>
+                    {/* Single-line animated step indicator */}
+                    <div className="relative overflow-x-auto whitespace-nowrap no-scrollbar">
+                      <div className="inline-flex items-center gap-3 pr-2">
+                        {steps.map((s, i) => {
+                          const state =
+                            i < stepIndex ? "done"
+                            : i === stepIndex ? "current"
+                            : "pending";
+
+                          return (
+                            <span
+                              key={i}
+                              ref={(el) => { stepRefs.current[i] = el; }}
+                              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs ${
+                                state === "done"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : state === "current"
+                                  ? "bg-amber-50 text-amber-800 border-amber-200"
+                                  : "bg-white text-stone-500 border-stone-200"
+                              }`}
+                            >
+                              {state === "done" ? (
+                                <span className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-emerald-500">
+                                  <span className="h-2 w-2 bg-white rounded-full" />
+                                </span>
+                              ) : state === "current" ? (
+                                <Loader2 className="h-3.5 w-3.5 text-amber-600 animate-spin" />
+                              ) : (
+                                <span className="h-3.5 w-3.5 rounded-full border border-stone-300" />
+                              )}
+                              <span className={`${state === "current" ? "animate-pulse" : ""}`}>{s}</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
