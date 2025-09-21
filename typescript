@@ -1,0 +1,8 @@
+// Corrected src/pages/Summary.tsx
+import { Loader2, SendHorizonal, Shield, AlertTriangle, CheckCircle } from "lucide-react";
+
+// ... other imports and code
+
+// Removed the downloadReport function entirely as it's no longer needed.
+
+// ... rest of the component code

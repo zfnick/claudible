@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, SendHorizonal, Download, Shield, AlertTriangle, CheckCircle } from "lucide-react";
+import { Loader2, SendHorizonal, Shield, AlertTriangle, CheckCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 /* removed Recharts imports */
 
@@ -768,14 +768,6 @@ export default function Summary() {
             <Card className="bg-amber-200/60 border-stone-300 h-[78vh] flex flex-col overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between shrink-0">
                 <CardTitle className="text-3xl tracking-tight text-stone-900">Summary</CardTitle>
-                <Button
-                  variant="outline"
-                  onClick={downloadReport}
-                  className="gap-2 disabled:opacity-50"
-                  disabled={!viz}
-                >
-                  <Download className="h-4 w-4" /> Download JSON
-                </Button>
               </CardHeader>
 
               {/* Scrollable content area */}
