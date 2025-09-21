@@ -1,257 +1,130 @@
-## Overview
-
-This project uses the following tech stack:
-- Vite
-- Typescript
-- React Router v7 (all imports from `react-router` instead of `react-router-dom`)
-- React 19 (for frontend components)
-- Tailwind v4 (for styling)
-- Shadcn UI (for UI components library)
-- Lucide Icons (for icons)
-- Convex (for backend & database)
-- Convex Auth (for authentication)
-- Framer Motion (for animations)
-- Three js (for 3d models)
-
-All relevant files live in the 'src' directory.
-
-Use pnpm for the package manager.
-
-## Setup
-
-This project is set up already and running on a cloud environment, as well as a convex development in the sandbox.
-
-## Environment Variables
-
-The project is set up with project specific CONVEX_DEPLOYMENT and VITE_CONVEX_URL environment variables on the client side.
-
-The convex server has a separate set of environment variables that are accessible by the convex backend.
-
-Currently, these variables include auth-specific keys: JWKS, JWT_PRIVATE_KEY, and SITE_URL.
-
-
-# Using Authentication (Important!)
-
-You must follow these conventions when using authentication.
-
-## Auth is already set up.
-
-All convex authentication functions are already set up. The auth currently uses email OTP and anonymous users, but can support more.
-
-The email OTP configuration is defined in `src/convex/auth/emailOtp.ts`. DO NOT MODIFY THIS FILE.
-
-Also, DO NOT MODIFY THESE AUTH FILES: `src/convex/auth.config.ts` and `src/convex/auth.ts`.
-
-## Using Convex Auth on the backend
-
-On the `src/convex/users.ts` file, you can use the `getCurrentUser` function to get the current user's data.
-
-## Using Convex Auth on the frontend
-
-The `/auth` page is already set up to use auth. Navigate to `/auth` for all log in / sign up sequences.
-
-You MUST use this hook to get user data. Never do this yourself without the hook:
-```typescript
-import { useAuth } from "@/hooks/use-auth";
-
-const { isLoading, isAuthenticated, user, signIn, signOut } = useAuth();
-```
-
-## Protected Routes
-
-When protecting a page, use the auth hooks to check for authentication and redirect to /auth.
-
-## Auth Page
-
-The auth page is defined in `src/pages/Auth.tsx`. Redirect authenticated pages and sign in / sign up to /auth.
-
-## Authorization
-
-You can perform authorization checks on the frontend and backend.
-
-On the frontend, you can use the `useAuth` hook to get the current user's data and authentication state.
-
-You should also be protecting queries, mutations, and actions at the base level, checking for authorization securely.
-
-## Adding a redirect after auth
-
-In `src/main.tsx`, you must add a redirect after auth URL to redirect to the correct dashboard/profile/page that should be created after authentication.
-
-# Frontend Conventions
-
-You will be using the Vite frontend with React 19, Tailwind v4, and Shadcn UI.
-
-Generally, pages should be in the `src/pages` folder, and components should be in the `src/components` folder.
-
-Shadcn primitives are located in the `src/components/ui` folder and should be used by default.
-
-## Page routing
-
-Your page component should go under the `src/pages` folder.
-
-When adding a page, update the react router configuration in `src/main.tsx` to include the new route you just added.
-
-## Shad CN conventions
-
-Follow these conventions when using Shad CN components, which you should use by default.
-- Remember to use "cursor-pointer" to make the element clickable
-- For title text, use the "tracking-tight font-bold" class to make the text more readable
-- Always make apps MOBILE RESPONSIVE. This is important
-- AVOID NESTED CARDS. Try and not to nest cards, borders, components, etc. Nested cards add clutter and make the app look messy.
-- AVOID SHADOWS. Avoid adding any shadows to components. stick with a thin border without the shadow.
-- Avoid skeletons; instead, use the loader2 component to show a spinning loading state when loading data.
-
-
-## Landing Pages
-
-You must always create good-looking designer-level styles to your application. 
-- Make it well animated and fit a certain "theme", ie neo brutalist, retro, neumorphism, glass morphism, etc
-
-Use known images and emojis from online.
-
-If the user is logged in already, show the get started button to say "Dashboard" or "Profile" instead to take them there.
-
-## Responsiveness and formatting
-
-Make sure pages are wrapped in a container to prevent the width stretching out on wide screens. Always make sure they are centered aligned and not off-center.
-
-Always make sure that your designs are mobile responsive. Verify the formatting to ensure it has correct max and min widths as well as mobile responsiveness.
-
-- Always create sidebars for protected dashboard pages and navigate between pages
-- Always create navbars for landing pages
-- On these bars, the created logo should be clickable and redirect to the index page
-
-## Animating with Framer Motion
-
-You must add animations to components using Framer Motion. It is already installed and configured in the project.
-
-To use it, import the `motion` component from `framer-motion` and use it to wrap the component you want to animate.
-
-
-### Other Items to animate
-- Fade in and Fade Out
-- Slide in and Slide Out animations
-- Rendering animations
-- Button clicks and UI elements
-
-Animate for all components, including on landing page and app pages.
-
-## Three JS Graphics
-
-Your app comes with three js by default. You can use it to create 3D graphics for landing pages, games, etc.
-
-
-## Colors
-
-You can override colors in: `src/index.css`
-
-This uses the oklch color format for tailwind v4.
-
-Always use these color variable names.
-
-Make sure all ui components are set up to be mobile responsive and compatible with both light and dark mode.
-
-Set theme using `dark` or `light` variables at the parent className.
-
-## Styling and Theming
-
-When changing the theme, always change the underlying theme of the shad cn components app-wide under `src/components/ui` and the colors in the index.css file.
-
-Avoid hardcoding in colors unless necessary for a use case, and properly implement themes through the underlying shad cn ui components.
-
-When styling, ensure buttons and clickable items have pointer-click on them (don't by default).
-
-Always follow a set theme style and ensure it is tuned to the user's liking.
-
-## Toasts
-
-You should always use toasts to display results to the user, such as confirmations, results, errors, etc.
-
-Use the shad cn Sonner component as the toaster. For example:
-
-```
-import { toast } from "sonner"
-
-import { Button } from "@/components/ui/button"
-export function SonnerDemo() {
-  return (
-    <Button
-      variant="outline"
-      onClick={() =>
-        toast("Event has been created", {
-          description: "Sunday, December 03, 2023 at 9:00 AM",
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
-        })
-      }
-    >
-      Show Toast
-    </Button>
-  )
+# Audit Assistant UI – Hackathon Prototype
+
+AI-Enhanced Compliance Audit Assistant
+Scan cloud configurations and logs to flag compliance risks (e.g., HIPAA, GDPR, ISO 27001) and produce human‑readable explanations for audit readiness. This repository contains a front‑end, session‑only demo suitable for a hackathon showcase. No sensitive cloud connections are made in this prototype, and no user data is persisted.
+
+Note: This project is a mock hackathon front end. It does not call any external AI or cloud provider APIs. It simulates the full user experience end‑to‑end.
+
+## Problem Statement
+
+Organizations struggle to quickly understand their cloud compliance posture across multiple frameworks. Audits are time‑consuming, require expert knowledge, and deliver findings that are often not actionable. Teams want:
+- Rapid checks against major frameworks (HIPAA, GDPR, ISO 27001, etc.)
+- Clear explanations and remediation guidance
+- A session‑based experience that doesn't retain their data
+
+## Vision
+
+Enable users to delegate a read‑only, least‑privilege access to their cloud (no write access), then ask natural questions like "check security compliance" or "show risks for access controls." An agentic AI would:
+1) Read relevant configurations and logs (scoped to the user's prompt)
+2) Summarize findings and violations
+3) Produce a dashboard, concise summary, and "what you should do" recommendations with justifications based on the observed data
+
+For this hackathon front‑end demo, everything is simulated locally. No external services are invoked. The future direction is to support a read‑only integration for a user's account (e.g., user grants a least‑privilege access) so the agent can analyze only what the user requests. Nothing would be stored—reports live only for the current session.
+
+## What This Demo Includes
+
+- Landing page with the product story and a clear call to action
+- Simple login (demo only) that routes to a dashboard
+- Provider selection and a "Before Start" step (reads account ID, non‑persistent)
+- AI‑assisted Summary page:
+  - Session‑based "scan" simulation driven by user prompts
+  - Realistic staged loading with progress and animated steps
+  - KPI pills: Critical Issues, Medium Risks, Compliant
+  - Severity distribution (stacked bar)
+  - Latest Scan Results with expandable details:
+    - Explanation
+    - Referenced frameworks (violations)
+    - "What you should do" remediation steps
+  - Context‑aware chat that can summarize and expand existing findings without re‑running a full analysis
+  - Download as a print‑optimized PDF: includes a print‑only header, KPI snapshot, and a detailed findings table with full details
+- Session model: refreshing or "ending session" clears all data; nothing is stored
+
+## How It Works (Demo Mode)
+
+- No external connections, keys, or accounts required
+- The assistant simulates "analysis" based on your prompt, including:
+  - Generic compliance findings
+  - Malaysia‑specific use cases (NCCP 2025, Cybersecurity Act 2024, Data Sharing Act 2025) to showcase localization
+  - Structured JSON input support (paste JSON that describes buckets, roles, functions, etc.) to generate consistent counts and recommendations
+- All results are in‑memory only for the session
+- The PDF export uses the browser's print flow with specialized print styles to include the entire report contents (not a cropped screenshot)
+
+## Future Roadmap (Post‑Hackathon)
+
+- Add a secure, read‑only, least‑privilege integration so users can allow the agent to analyze their cloud resources on demand
+- Expand coverage across more frameworks and jurisdictions
+- Enrich the PDF export with deeper visuals and an executive summary section
+- Opt‑in encrypted report persistence for team sharing (off by default)
+
+## Using The Demo
+
+1) Install deps
+- Use your standard frontend tooling (pnpm or npm). The project is Vite + React + Tailwind.  
+
+2) Run the dev server
+- Start the Vite dev server and open the app in your browser
+
+3) Try the flow
+- Home → Login → Dashboard → Providers → Before Start → Summary
+- In Summary, type prompts like:
+  - "Summarize current risks"
+  - "Explain the public bucket issue"
+  - "Show details for IAM over‑privileged role"
+  - "More examples"
+  - Or paste structured configuration JSON to drive specific findings
+
+4) Export a report
+- Click "Download PDF" on the Summary page to print a clean, multi‑page report including the KPI snapshot and a detailed table of findings with explanations, violations, and remediation
+
+## Sample Structured JSON (Demo Input)
+
+Paste a minimal JSON to drive deterministic results, for example:
+{
+  "S3Buckets": [
+    { "BucketName": "customer-data", "PublicAccess": true, "Encryption": "None", "Versioning": "Disabled", "LoggingEnabled": false }
+  ],
+  "IAMRoles": [
+    { "RoleName": "AdminRole", "AttachedPolicies": ["AdministratorAccess"], "MFAEnabled": false }
+  ],
+  "LambdaFunctions": [
+    { "FunctionName": "GenerateReports", "EnvironmentVariables": { "API_KEY": "plaintext" }, "Role": "AdminExecutionRole" }
+  ]
 }
-```
 
-Remember to import { toast } from "sonner". Usage: `toast("Event has been created.")`
+The Summary will reflect the severities and produce corresponding recommendations.
 
-## Dialogs
+## Design & UX
 
-Always ensure your larger dialogs have a scroll in its content to ensure that its content fits the screen size. Make sure that the content is not cut off from the screen.
+- Theme: Light, modern Glassmorphism
+- Strong emphasis on contrast and readability across all pages
+- Smooth animations using Framer Motion
+- Print‑optimized report:
+  - Dedicated print header (logo, timestamp)
+  - All content flows naturally across pages (no cropping)
+  - Dark text enforced for print for legibility
+  - Detailed table includes complete finding details
 
-Ideally, instead of using a new page, use a Dialog instead. 
+## Tech Stack (Frontend)
 
-# Using the Convex backend
+- Vite + React + TypeScript
+- Tailwind CSS v4
+- Shadcn UI components
+- Framer Motion for animations
 
-You will be implementing the convex backend. Follow your knowledge of convex and the documentation to implement the backend.
+Note: The repository contains scaffolding for more advanced capabilities (such as auth and backend wiring) to support future iterations, but the hackathon demo runs fully locally with simulated data and does not require any external services.
 
-## The Convex Schema
+## Security & Data
 
-You must correctly follow the convex schema implementation.
+- Session‑only: No data is saved to a database in this demo
+- No external API calls are performed
+- PDF export is local; nothing is uploaded
 
-The schema is defined in `src/convex/schema.ts`.
+## Contributing (Hackathon)
 
-Do not include the `_id` and `_creationTime` fields in your queries (it is included by default for each table).
-Do not index `_creationTime` as it is indexed for you. Never have duplicate indexes.
+- Keep changes minimal, composable, and UI‑first
+- Maintain session‑only behavior (no persistence)
+- Preserve print‑friendly styles and end‑to‑end demo flow
 
+## License
 
-## Convex Actions: Using CRUD operations
-
-When running anything that involves external connections, you must use a convex action with "use node" at the top of the file.
-
-You cannot have queries or mutations in the same file as a "use node" action file. Thus, you must use pre-built queries and mutations in other files.
-
-You can also use the pre-installed internal crud functions for the database:
-
-```ts
-// in convex/users.ts
-import { crud } from "convex-helpers/server/crud";
-import schema from "./schema.ts";
-
-export const { create, read, update, destroy } = crud(schema, "users");
-
-// in some file, in an action:
-const user = await ctx.runQuery(internal.users.read, { id: userId });
-
-await ctx.runMutation(internal.users.update, {
-  id: userId,
-  patch: {
-    status: "inactive",
-  },
-});
-```
-
-
-## Common Convex Mistakes To Avoid
-
-When using convex, make sure:
-- Document IDs are referenced as `_id` field, not `id`.
-- Document ID types are referenced as `Id<"TableName">`, not `string`.
-- Document object types are referenced as `Doc<"TableName">`.
-- Keep schemaValidation to false in the schema file.
-- You must correctly type your code so that it passes the type checker.
-- You must handle null / undefined cases of your convex queries for both frontend and backend, or else it will throw an error that your data could be null or undefined.
-- Always use the `@/folder` path, with `@/convex/folder/file.ts` syntax for importing convex files.
-- This includes importing generated files like `@/convex/_generated/server`, `@/convex/_generated/api`
-- Remember to import functions like useQuery, useMutation, useAction, etc. from `convex/react`
-- NEVER have return type validators.
+For hackathon and demo purposes only. Review before using in production.
