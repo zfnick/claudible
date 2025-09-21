@@ -439,12 +439,7 @@ export default function Summary() {
                     {/* Single-line animated step indicator (completed collapse into ticks, only current step shown) */}
                     <div className="relative overflow-x-auto whitespace-nowrap no-scrollbar">
                       <div className="inline-flex items-center gap-3 pr-2">
-                        {/* Completed steps as ticks */}
-                        {Array.from({ length: stepIndex }).map((_, i) => (
-                          <CheckCircle key={i} className="h-3.5 w-3.5 text-emerald-600" />
-                        ))}
-
-                        {/* Current step chip with spinner */}
+                        {/* Only show the current step; completed steps disappear */}
                         <span
                           ref={(el) => { stepRefs.current[stepIndex] = el; }}
                           className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs bg-amber-50 text-amber-800 border-amber-200"
