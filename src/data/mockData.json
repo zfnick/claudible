@@ -1,0 +1,81 @@
+{
+  "scanSummary": {
+    "passed": 12,
+    "failed": 3,
+    "warnings": 2,
+    "totalChecks": 17
+  },
+  "standards": [
+    {
+      "name": "ISO 27001",
+      "status": "Fail",
+      "issues": 2,
+      "riskScore": 8.8,
+      "explanations": [
+        {
+          "id": "sg-0a1b2c3d",
+          "description": "Security group allows SSH from 0.0.0.0/0",
+          "recommendation": "Restrict inbound SSH to trusted IP addresses",
+          "justification": "This control violates ISO 27001 A.9.1 (access restrictions)."
+        },
+        {
+          "id": "s3-bucket-public",
+          "description": "S3 bucket has public read access enabled",
+          "recommendation": "Remove public access and implement proper IAM policies",
+          "justification": "Violates ISO 27001 A.13.1 (information security in networks)."
+        }
+      ]
+    },
+    {
+      "name": "GDPR",
+      "status": "Pass",
+      "issues": 0,
+      "riskScore": 2.0,
+      "explanations": []
+    },
+    {
+      "name": "HIPAA",
+      "status": "Warning",
+      "issues": 1,
+      "riskScore": 5.5,
+      "explanations": [
+        {
+          "id": "encryption-at-rest",
+          "description": "RDS instance lacks encryption at rest",
+          "recommendation": "Enable encryption for all database instances",
+          "justification": "HIPAA requires encryption of PHI at rest (164.312(a)(2)(iv))."
+        }
+      ]
+    },
+    {
+      "name": "SOC 2",
+      "status": "Pass",
+      "issues": 0,
+      "riskScore": 1.2,
+      "explanations": []
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "High",
+      "title": "Restrict SSH Access",
+      "description": "Update security group sg-0a1b2c3d to allow SSH only from trusted IP ranges",
+      "impact": "Reduces exposure to brute-force attacks and unauthorized access",
+      "effort": "Low"
+    },
+    {
+      "priority": "High", 
+      "title": "Secure S3 Bucket",
+      "description": "Remove public read access from S3 bucket and implement least-privilege IAM policies",
+      "impact": "Prevents data breaches and unauthorized data access",
+      "effort": "Medium"
+    },
+    {
+      "priority": "Medium",
+      "title": "Enable Database Encryption",
+      "description": "Enable encryption at rest for RDS instances containing sensitive data",
+      "impact": "Ensures compliance with HIPAA encryption requirements",
+      "effort": "Medium"
+    }
+  ]
+}
