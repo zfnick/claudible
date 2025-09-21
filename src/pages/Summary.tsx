@@ -697,17 +697,8 @@ export default function Summary() {
       const result = generateMockAnalysis(trimmed);
       setViz(result);
 
-      const response = [
-        "Analysis complete.",
-        `Top risks detected around: ${
-          result.standards
-            .filter(s => s.issues > 0)
-            .slice(0, 2)
-            .map(s => s.name)
-            .join(", ") || "no major standards"
-        }.`,
-        "Updated the left panel with KPIs, charts, and recommendations."
-      ].join(" ");
+      // Replace the old completion message with the requested copy
+      const response = "Analysis Completed. Your Audit summary has been generated. DO you need futher explaation?";
 
       setMessages(prev => [...prev, { role: "assistant", content: response }]);
       setLoading(false);
