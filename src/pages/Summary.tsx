@@ -734,6 +734,26 @@ export default function Summary() {
     return [...viz.useCases].sort((a, b) => order[a.severity] - order[b.severity]);
   }, [viz]);
 
+  // Add: simple aggregates for charts
+  const serviceAgg = useMemo(() => {
+    const list = viz?.useCases ?? [];
+    const map: Record<string, number> = {};
+    for (const u of list) map[u.service] = (map[u.service] ?? 0) + 1;
+    return Object.entries(map)
+      .map(([service, count]) => ({ service, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [viz]);
+
+  const frameworkAgg = useMemo(() => {
+    const list = viz?.useCases ?? [];
+    const map: Record<string, number> = {};
+    for (const u of list) for (const fw of (u.frameworks ?? [])) map[fw] = (map[fw] ?? 0) + 1;
+    return Object.entries(map)
+      .map(([fw, count]) => ({ fw, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 12);
+  }, [viz]);
+
   return (
     <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900">
       {/* Header */}
@@ -821,6 +841,100 @@ export default function Summary() {
                         <Badge className="bg-stone-800 text-stone-100">{counts.compliant}</Badge>
                       </div>
                     </div>
+
+                    {/* NEW: Severity Distribution (stacked bar) */}
+                    <Card className="bg-white/70 border-stone-200">
+                      <CardHeader>
+                        <CardTitle className="text-base text-stone-900">Severity distribution</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {(() => {
+                          const total = counts.critical + counts.medium + counts.compliant || 1;
+                          const critPct = Math.round((counts.critical / total) * 100);
+                          const medPct = Math.round((counts.medium / total) * 100);
+                          const compPct = Math.max(0, 100 - critPct - medPct);
+                          return (
+                            <div className="space-y-3">
+                              <div className="h-3 w-full rounded-full overflow-hidden bg-stone-200 border border-stone-300">
+                                <div className="h-full bg-rose-500" style={{ width: `${critPct}%` }} />
+                                <div className="h-full bg-amber-500" style={{ width: `${medPct}%` }} />
+                                <div className="h-full bg-emerald-500" style={{ width: `${compPct}%` }} />
+                              </div>
+                              <div className="flex flex-wrap gap-3 text-xs text-stone-700">
+                                <span className="inline-flex items-center gap-2">
+                                  <span className="h-2.5 w-2.5 rounded-full bg-rose-500 border border-rose-600" />
+                                  Critical: {counts.critical} ({critPct}%)
+                                </span>
+                                <span className="inline-flex items-center gap-2">
+                                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500 border border-amber-600" />
+                                  Medium: {counts.medium} ({medPct}%)
+                                </span>
+                                <span className="inline-flex items-center gap-2">
+                                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 border border-emerald-600" />
+                                  Compliant: {counts.compliant} ({compPct}%)
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </CardContent>
+                    </Card>
+
+                    {/* NEW: Findings by service */}
+                    <Card className="bg-white/70 border-stone-200">
+                      <CardHeader>
+                        <CardTitle className="text-base text-stone-900">Findings by service</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {(() => {
+                          const max = Math.max(1, ...serviceAgg.map(s => s.count));
+                          return serviceAgg.length === 0 ? (
+                            <div className="text-sm text-stone-600">No findings yet.</div>
+                          ) : (
+                            serviceAgg.map((s, i) => (
+                              <div key={i} className="space-y-1">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-stone-800">{s.service}</span>
+                                  <span className="text-stone-600">{s.count}</span>
+                                </div>
+                                <div className="h-2 w-full rounded-full bg-stone-200 overflow-hidden border border-stone-300">
+                                  <div
+                                    className="h-full bg-stone-800"
+                                    style={{ width: `${Math.round((s.count / max) * 100)}%` }}
+                                  />
+                                </div>
+                              </div>
+                            ))
+                          );
+                        })()}
+                      </CardContent>
+                    </Card>
+
+                    {/* NEW: Framework frequency */}
+                    <Card className="bg-white/70 border-stone-200">
+                      <CardHeader>
+                        <CardTitle className="text-base text-stone-900">Framework frequency</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {frameworkAgg.length === 0 ? (
+                          <div className="text-sm text-stone-600">No frameworks detected.</div>
+                        ) : (
+                          <div className="flex flex-wrap gap-2">
+                            {frameworkAgg.map((f, i) => (
+                              <span
+                                key={i}
+                                className="inline-flex items-center gap-2 text-xs rounded-full border px-3 py-1 bg-stone-100 text-stone-800 border-stone-200"
+                              >
+                                {f.fw}
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-stone-800 text-stone-100">
+                                  {f.count}
+                                </span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
 
                     {/* Latest Scan Results: now sorted by severity */}
                     <Card className="bg-white/70 border-stone-200">
