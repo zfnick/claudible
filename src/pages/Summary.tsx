@@ -71,6 +71,52 @@ function generateMockAnalysis(prompt: string) {
     };
   });
 
+  // Add curated demo use cases for the cloud configuration checks
+  const useCases = [
+    {
+      service: "S3 Buckets",
+      title: "Public bucket accidentally containing sensitive customer data",
+      explanation:
+        "Detected publicly accessible S3 bucket with objects likely containing sensitive customer data. Public access increases risk of data exposure and non-compliance.",
+      frameworks: ["PDPA 2010", "ISO 27018"],
+      remediation: [
+        "Enable Block Public Access for the account and bucket.",
+        "Set bucket policy to deny public access; use VPC endpoints or signed URLs.",
+        "Enable default encryption (SSE-S3 or SSE-KMS) and enforce TLS in transit.",
+        "Run inventory to identify sensitive objects and apply object-level ACL cleanup.",
+      ],
+      severity: "High" as const,
+    },
+    {
+      service: "IAM Roles",
+      title: "Admin role with no MFA and excessive permissions",
+      explanation:
+        "Over-privileged IAM role without MFA increases blast radius and violates least-privilege principles.",
+      frameworks: ["BNM RMiT", "ISO 27001"],
+      remediation: [
+        "Require MFA for any privileged role/session using condition keys.",
+        "Refactor policies to least-privilege; remove wildcards and unused actions.",
+        "Enable Access Analyzer and periodic access reviews with automation.",
+        "Rotate credentials and disable long‑lived keys for admins.",
+      ],
+      severity: "High" as const,
+    },
+    {
+      service: "Lambda Functions",
+      title: "Unencrypted environment variables containing secrets",
+      explanation:
+        "Lambda environment variables contain plaintext secrets and function assumes a broad execution role.",
+      frameworks: ["PDPA 2010", "ISO 27018"],
+      remediation: [
+        "Move secrets to AWS Secrets Manager or SSM Parameter Store with KMS.",
+        "Enable encryption helpers and do not store secrets in env vars.",
+        "Tighten the Lambda execution role to least-privilege.",
+        "Enable CloudWatch logging and alarms for anomalous access.",
+      ],
+      severity: "Medium" as const,
+    },
+  ];
+
   return {
     prompt,
     summary: summaries,
@@ -78,6 +124,7 @@ function generateMockAnalysis(prompt: string) {
     standards,
     recommendations: selected,
     trend,
+    useCases,
   };
 }
 
@@ -347,6 +394,51 @@ export default function Summary() {
                             <Line type="monotone" dataKey="Risk" stroke="#f59e0b" strokeWidth={2} dot={false} />
                           </LineChart>
                         </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+
+                    {/* New: Recommended Use Cases (Demo) */}
+                    <Card className="bg-white/70 border-stone-200">
+                      <CardHeader>
+                        <CardTitle className="text-base text-stone-900">Recommended Use Cases (Demo)</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {viz.useCases?.map((uc, i) => (
+                          <div
+                            key={i}
+                            className="rounded-xl border border-stone-200 bg-white/60 p-4"
+                          >
+                            <div className="flex items-center justify-between gap-3 mb-2">
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-stone-800 text-stone-100">{uc.service}</Badge>
+                                <span className="text-xs rounded-full border px-2 py-0.5
+                                  {uc.severity === 'High' ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-amber-100 text-amber-800 border-amber-200'}">
+                                  {uc.severity} Severity
+                                </span>
+                              </div>
+                            </div>
+                            <div className="font-semibold text-stone-900 mb-1">{uc.title}</div>
+                            <p className="text-sm text-stone-700 mb-3">{uc.explanation}</p>
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {uc.frameworks.map((fw) => (
+                                <span
+                                  key={fw}
+                                  className="text-xs rounded-full border px-2 py-0.5 bg-stone-100 text-stone-800 border-stone-200"
+                                >
+                                  {fw}
+                                </span>
+                              ))}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-stone-800 mb-1">Suggested remediation:</div>
+                              <ul className="list-disc pl-5 space-y-1 text-sm text-stone-800">
+                                {uc.remediation.map((r, idx) => (
+                                  <li key={idx}>{r}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        ))}
                       </CardContent>
                     </Card>
 
