@@ -527,7 +527,6 @@ export default function Summary() {
 
       const response = [
         "Analysis complete.",
-        `High-level view: ${result.scanSummary.passed} passed, ${result.scanSummary.failed} failed, ${result.scanSummary.warnings} warnings.`,
         `Top risks detected around: ${
           result.standards
             .filter(s => s.issues > 0)
@@ -635,11 +634,34 @@ export default function Summary() {
                       ))}
                     </div>
 
+                    {/* NEW: High-level view counts (Passed / Failed / Warnings) */}
+                    <Card className="bg-white/70 border-stone-200">
+                      <CardHeader>
+                        <CardTitle className="text-base text-stone-900">High-level view</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 border-emerald-200">
+                            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                            {viz.scanSummary.passed} Passed
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-rose-100 text-rose-700 border-rose-200">
+                            <span className="h-2 w-2 rounded-full bg-rose-500" />
+                            {viz.scanSummary.failed} Failed
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-amber-100 text-amber-800 border-amber-200">
+                            <span className="h-2 w-2 rounded-full bg-amber-500" />
+                            {viz.scanSummary.warnings} Warnings
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+
                     {/* Removed Charts: Compliance Overview and Issues by Standard */}
 
                     {/* Removed Weekly Trend */}
 
-                    {/* New: Recommended Use Cases (Demo) */}
+                    {/* New: Recommended Use Cases (Demo) renamed to Latest Scan Results already */}
                     <Card className="bg-white/70 border-stone-200">
                       <CardHeader>
                         <CardTitle className="text-base text-stone-900">Latest Scan Results</CardTitle>
