@@ -26,9 +26,11 @@ export default function SimpleLogin() {
       <header className="border-b border-stone-200 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full grid place-items-center border border-stone-300">
-              <span className="text-xs">✳</span>
-            </div>
+            <img
+              src="https://harmless-tapir-303.convex.cloud/api/storage/680f6340-5118-48fd-990f-c89cecd311ef"
+              alt="Claudible logo"
+              className="h-8 w-8 object-contain"
+            />
             <span className="font-semibold tracking-wide">CLAUDIBLE</span>
           </div>
           <Link to="/" className="text-sm underline">Home</Link>
