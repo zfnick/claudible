@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, SendHorizonal, Download, Shield, AlertTriangle, CheckCircle } from "lucide-react";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Progress } from "@/components/ui/progress";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
 
 type Message = { role: "user" | "assistant" | "system"; content: string };
 
@@ -58,12 +59,25 @@ function generateMockAnalysis(prompt: string) {
 
   const selected = recs.sort(() => 0.5 - Math.random()).slice(3);
 
+  // Add a weekly trend for interactivity
+  const trendDays = 7;
+  const trend = Array.from({ length: trendDays }, (_, i) => {
+    const base = 30 + Math.random() * 20;
+    return {
+      day: `Day ${i + 1}`,
+      Security: Number((base + Math.random() * 10).toFixed(1)),
+      Governance: Number((base * 0.8 + Math.random() * 8).toFixed(1)),
+      Risk: Number((base * 0.6 + Math.random() * 6).toFixed(1)),
+    };
+  });
+
   return {
     prompt,
     summary: summaries,
     scanSummary: { passed, failed, warnings, total },
     standards,
     recommendations: selected,
+    trend,
   };
 }
 
@@ -76,6 +90,7 @@ export default function Summary() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
 
   // Visualization state: start EMPTY until a valid question arrives
   const [viz, setViz] = useState<Viz | null>(null);
@@ -89,55 +104,40 @@ export default function Summary() {
     [viz]
   );
 
+  const steps: Array<string> = [
+    "Initializing compliance engine…",
+    "Gathering recent audit logs…",
+    "Checking IAM roles, policies & MFA posture…",
+    "Scanning storage buckets for public access & encryption…",
+    "Reviewing network ACLs, security groups & firewall rules…",
+    "Validating logging & monitoring (CloudTrail/CloudWatch)…",
+    "Cross-referencing with ISO 27001, SOC 2, GDPR, HIPAA controls…",
+    "Computing risk scores and mapping to Security/Governance/Risk…",
+    "Preparing visualizations and remediation guidance…"
+  ];
+
   const send = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
 
     setMessages(prev => [...prev, { role: "user", content: trimmed }]);
     setInput("");
+    setViz(null);
     setLoading(true);
-
-    // Guardrail
-    if (!isOnTopic(trimmed)) {
-      setTimeout(() => {
-        setMessages(prev => [
-          ...prev,
-          {
-            role: "assistant",
-            content:
-              "I'm focused on security and compliance topics (e.g., ISO 27001, SOC 2, GDPR, HIPAA, IAM, encryption, audit logs). Please rephrase your question in that scope."
-          }
-        ]);
-        setLoading(false);
-      }, 900);
-      return;
-    }
-
-    // Simulated, convincing staged analysis (20–30s) with progressive status updates.
-    const steps: Array<string> = [
-      "Initializing compliance engine…",
-      "Gathering recent audit logs…",
-      "Checking IAM roles, policies & MFA posture…",
-      "Scanning storage buckets for public access & encryption…",
-      "Reviewing network ACLs, security groups & firewall rules…",
-      "Validating logging & monitoring (CloudTrail/CloudWatch)…",
-      "Cross-referencing with ISO 27001, SOC 2, GDPR, HIPAA controls…",
-      "Computing risk scores and mapping to Security/Governance/Risk…",
-      "Preparing visualizations and remediation guidance…"
-    ];
+    setStepIndex(0);
 
     const totalDelay = 20000 + Math.random() * 10000; // 20–30s
-    const stepInterval = Math.floor(totalDelay / (steps.length + 1));
+    const stepInterval = Math.floor(totalDelay / steps.length);
+    // Drive a visual loader instead of pushing step messages
+    const interval = setInterval(() => {
+      setStepIndex(prev => {
+        if (prev < steps.length - 1) return prev + 1;
+        return prev;
+      });
+    }, stepInterval);
 
-    // Push staged updates
-    steps.forEach((s, i) => {
-      setTimeout(() => {
-        setMessages(prev => [...prev, { role: "assistant", content: s }]);
-      }, stepInterval * (i + 1));
-    });
-
-    // Finalize after long delay
     setTimeout(() => {
+      clearInterval(interval);
       const result = generateMockAnalysis(trimmed);
       setViz(result);
 
@@ -163,6 +163,9 @@ export default function Summary() {
     () => viz ? viz.standards.map(s => ({ name: s.name, issues: s.issues, riskScore: s.riskScore })) : [],
     [viz]
   );
+
+  // Derive progress percent for loader
+  const progressPercent = Math.min(100, Math.round(((stepIndex + 1) / steps.length) * 100));
 
   const downloadReport = () => {
     if (!viz) return;
@@ -216,6 +219,23 @@ export default function Summary() {
 
               {/* Scrollable content area */}
               <CardContent className="flex-1 overflow-y-auto space-y-6">
+                {/* Loading skeleton visuals while thinking */}
+                {loading && !viz ? (
+                  <div className="space-y-6 animate-pulse">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="h-20 bg-white/50 border border-stone-200 rounded-xl" />
+                      <div className="h-20 bg-white/50 border border-stone-200 rounded-xl" />
+                      <div className="h-20 bg-white/50 border border-stone-200 rounded-xl" />
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="h-72 bg-white/60 border border-stone-200 rounded-xl" />
+                      <div className="h-72 bg-white/60 border border-stone-200 rounded-xl" />
+                    </div>
+                    <div className="h-64 bg-white/60 border border-stone-200 rounded-xl" />
+                  </div>
+                ) : null}
+
+                {/* Render visualizations when ready */}
                 {!viz ? null : (
                   <>
                     {/* KPI pills: Security, Governance, Risk */}
@@ -269,6 +289,27 @@ export default function Summary() {
                       </Card>
                     </div>
 
+                    {/* New: Weekly Trend line chart */}
+                    <Card className="bg-white/70 border-stone-200">
+                      <CardHeader>
+                        <CardTitle className="text-base text-stone-900">Weekly Trend</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={280}>
+                          <LineChart data={viz.trend}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="day" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Line type="monotone" dataKey="Security" stroke="#10b981" strokeWidth={2} dot={false} />
+                            <Line type="monotone" dataKey="Governance" stroke="#3b82f6" strokeWidth={2} dot={false} />
+                            <Line type="monotone" dataKey="Risk" stroke="#f59e0b" strokeWidth={2} dot={false} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </CardContent>
+                    </Card>
+
                     {/* Recommendations */}
                     <Card className="bg-white/70 border-stone-200">
                       <CardHeader>
@@ -313,17 +354,29 @@ export default function Summary() {
                     </div>
                   </div>
                 ))}
+
+                {/* Interactive loader instead of text bubbles while thinking */}
                 {loading && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[80%] px-4 py-2 rounded-2xl border bg-amber-200/80 text-stone-900 border-stone-300 flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Thinking…
-                    </div>
+                  <div className="border rounded-2xl bg-amber-50 text-stone-900 border-stone-300 p-4">
+                    <div className="mb-2 text-sm font-medium">Analyzing your request…</div>
+                    <Progress value={progressPercent} className="h-2 mb-3" />
+                    <ul className="space-y-1 text-sm">
+                      {steps.map((s, i) => (
+                        <li key={i} className={`flex items-center gap-2 ${i <= stepIndex ? "text-stone-900" : "text-stone-400"}`}>
+                          <span
+                            className={`h-2 w-2 rounded-full ${
+                              i < stepIndex ? "bg-emerald-500" : i === stepIndex ? "bg-amber-500 animate-pulse" : "bg-stone-300"
+                            }`}
+                          />
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </CardContent>
 
-              <div className="p-4 border-t border-stone-200">
+              <div className="p-3 border-t border-stone-200">
                 <div className="flex gap-2">
                   <Input
                     ref={inputRef}
