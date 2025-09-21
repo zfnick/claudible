@@ -902,6 +902,21 @@ export default function Summary() {
                               {isOpen ? (
                                 <div className="px-4 pb-4 space-y-3">
                                   <p className="text-sm text-stone-700">{uc.explanation}</p>
+
+                                  {/* New: Violations (based on compliance frameworks) */}
+                                  {Array.isArray(uc.frameworks) && uc.frameworks.length > 0 ? (
+                                    <div className="mt-2">
+                                      <div className="text-sm font-semibold text-stone-900 mb-1">Violations</div>
+                                      <ul className="list-disc pl-5 space-y-1">
+                                        {uc.frameworks.map((fw, idx) => (
+                                          <li key={idx} className="text-sm text-stone-700">
+                                            {fw}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  ) : null}
+
                                   {Array.isArray(uc.remediation) && uc.remediation.length > 0 ? (
                                     <div className="mt-2">
                                       <div className="text-sm font-semibold text-stone-900 mb-1">What you should do</div>
