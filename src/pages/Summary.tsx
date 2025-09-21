@@ -697,8 +697,8 @@ export default function Summary() {
       const result = generateMockAnalysis(trimmed);
       setViz(result);
 
-      // Replace the old completion message with the requested copy
-      const response = "Analysis Completed. Your Audit summary has been generated. DO you need futher explaation?";
+      // Update completion message to requested copy
+      const response = "Analysis Completed. Your compliance audit summary has been generated. Do you need further explanation?";
 
       setMessages(prev => [...prev, { role: "assistant", content: response }]);
       setLoading(false);
