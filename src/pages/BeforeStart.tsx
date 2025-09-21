@@ -70,7 +70,7 @@ export default function BeforeStart() {
                     className="bg-white"
                   />
                   <Button
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/summary")}
                     className="bg-stone-700 hover:bg-stone-800"
                   >
                     Done
