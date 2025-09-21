@@ -706,14 +706,14 @@ export default function Summary() {
                       : ""
                   }`,
               )
-              .join("\\n")
+              .join("\n")
           : "• No issues detected in the latest summary.";
 
       const nextSteps =
         viz.recommendations && viz.recommendations.length
-          ? `\\n\\nSuggested next steps:\\n- ${viz.recommendations
+          ? `\n\nSuggested next steps:\n- ${viz.recommendations
               .slice(0, 3)
-              .join("\\n- ")}`
+              .join("\n- ")}`
           : "";
 
       setMessages((prev) => [
@@ -721,7 +721,7 @@ export default function Summary() {
         {
           role: "assistant",
           content:
-            `Here are the top risks detected in your latest analysis:\\n${bullets}${nextSteps}\\n\\nWould you like me to dive deeper into any specific issue or standard?`,
+            `Here are the top risks detected in your latest analysis:\n${bullets}${nextSteps}\n\nWould you like me to dive deeper into any specific issue or standard?`,
         },
       ]);
       return;
@@ -1021,7 +1021,7 @@ export default function Summary() {
                   return (
                     <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-[80%] px-4 py-2 rounded-2xl border ${
+                        className={`max-w-[80%] px-4 py-2 rounded-2xl border whitespace-pre-wrap ${
                           isUser
                             ? "bg-stone-800 text-stone-50 border-stone-700"
                             : "bg-white/60 backdrop-blur-sm text-stone-900 border-stone-300 shadow-sm"
