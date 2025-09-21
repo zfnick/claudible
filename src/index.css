@@ -192,4 +192,35 @@
 
   /* Comfortable page margin */
   @page { margin: 12mm; }
+
+  /* Force dark, readable text for everything inside the print area */
+  #print-area, #print-area * {
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Neutralize dark-on-dark badges that might render white text */
+  #print-area .bg-stone-800,
+  #print-area .bg-stone-900,
+  #print-area .text-stone-50,
+  #print-area .text-white {
+    background: transparent !important;
+    color: #111 !important;
+    border-color: #999 !important;
+  }
+
+  /* Make any pill/badge outlines readable in print */
+  #print-area .border {
+    border-color: #bbb !important;
+  }
+
+  /* Keep headings clearly dark */
+  #print-area h1, 
+  #print-area h2, 
+  #print-area h3, 
+  #print-area .font-semibold, 
+  #print-area .font-bold {
+    color: #111 !important;
+  }
 }

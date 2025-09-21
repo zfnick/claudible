@@ -1045,6 +1045,9 @@ export default function Summary() {
                           <th className="text-left p-2 border-b border-stone-200">Service</th>
                           <th className="text-left p-2 border-b border-stone-200">Severity</th>
                           <th className="text-left p-2 border-b border-stone-200">Title</th>
+                          <th className="text-left p-2 border-b border-stone-200">Explanation</th>
+                          <th className="text-left p-2 border-b border-stone-200">Violations</th>
+                          <th className="text-left p-2 border-b border-stone-200">What you should do</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1053,6 +1056,17 @@ export default function Summary() {
                             <td className="p-2 border-b border-stone-100">{u.service}</td>
                             <td className="p-2 border-b border-stone-100">{u.severity}</td>
                             <td className="p-2 border-b border-stone-100">{u.title}</td>
+                            <td className="p-2 border-b border-stone-100">{u.explanation}</td>
+                            <td className="p-2 border-b border-stone-100">
+                              {Array.isArray(u.frameworks) && u.frameworks.length
+                                ? u.frameworks.join(", ")
+                                : "—"}
+                            </td>
+                            <td className="p-2 border-b border-stone-100">
+                              {Array.isArray(u.remediation) && u.remediation.length
+                                ? u.remediation.join("; ")
+                                : "—"}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
