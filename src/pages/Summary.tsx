@@ -659,7 +659,7 @@ export default function Summary() {
     // Determine if this is a lightweight follow-up after results are already present
     const isFollowUp =
       !!viz &&
-      /^(yes|y|more|explain|details|continue|why|how|elaborate|clarify)\b/i.test(
+      /^(yes|y|more|explain|details|continue|why|how|elaborate|clarify|summarize|summary|summarise)\b/i.test(
         trimmed,
       );
 
