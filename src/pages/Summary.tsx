@@ -17,14 +17,320 @@ const onTopicKeywords: Array<string> = [
 
 function isOnTopic(input: string) {
   const q = input.toLowerCase();
-  return onTopicKeywords.some(k => q.includes(k));
+  // Accept if matches keywords OR if it looks like a structured config payload
+  const looksLikeConfig =
+    input.trim().startsWith("{") &&
+    /"S3Buckets"|"IAMRoles"|"LambdaFunctions"/.test(input);
+  return looksLikeConfig || onTopicKeywords.some(k => q.includes(k));
 }
 
 function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Helper: Try to parse a structured config JSON from user input
+function tryParseConfig(input: string): null | {
+  S3Buckets?: Array<any>;
+  IAMRoles?: Array<any>;
+  LambdaFunctions?: Array<any>;
+} {
+  try {
+    const obj = JSON.parse(input);
+    if (
+      obj &&
+      (Array.isArray(obj.S3Buckets) ||
+        Array.isArray(obj.IAMRoles) ||
+        Array.isArray(obj.LambdaFunctions))
+    ) {
+      return obj;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+// Helper: Build analysis strictly from structured config, ensuring tallied counts
+function analyzeFromConfig(config: ReturnType<typeof tryParseConfig>, prompt: string) {
+  type UseCase = {
+    service: string;
+    title: string;
+    explanation: string;
+    frameworks: Array<string>;
+    remediation: Array<string>;
+    severity: "High" | "Medium" | "Low";
+  };
+
+  const useCases: Array<UseCase> = [];
+
+  let failed = 0;
+  let warnings = 0;
+  let passedResources = 0;
+
+  // S3 checks
+  const s3s: Array<any> = Array.isArray(config?.S3Buckets) ? config!.S3Buckets : [];
+  for (const b of s3s) {
+    const bucketIssues: Array<UseCase> = [];
+    const name = b.BucketName ?? "unknown";
+    const region = b.Region ?? "us-east-1";
+
+    if (b.PublicAccess === true) {
+      failed++;
+      bucketIssues.push({
+        service: "S3 Buckets",
+        title: `Public bucket: ${name}`,
+        explanation:
+          `S3 bucket '${name}' has public access enabled, potentially exposing sensitive data. This violates Malaysia PDPA 2010 and ISO 27018 requirements for secure personal data handling.`,
+        frameworks: ["PDPA 2010", "ISO 27018"],
+        remediation: [
+          "Enable Block Public Access at account and bucket levels.",
+          "Deny public access via bucket policy; use VPC endpoints or signed URLs.",
+          "Audit object ACLs to remove any public grants."
+        ],
+        severity: "High",
+      });
+    }
+    if ((b.Encryption ?? "None") === "None") {
+      failed++;
+      bucketIssues.push({
+        service: "S3 Buckets",
+        title: `No encryption at rest: ${name}`,
+        explanation:
+          `Default encryption is disabled for '${name}', risking data at rest exposure and non-compliance with encryption requirements.`,
+        frameworks: ["ISO 27001", "PDPA 2010"],
+        remediation: [
+          "Enable default encryption (SSE-S3 or SSE-KMS).",
+          "Rotate KMS keys and enforce TLS in transit.",
+        ],
+        severity: "High",
+      });
+    }
+    if ((b.Versioning ?? "Disabled") === "Disabled") {
+      warnings++;
+      bucketIssues.push({
+        service: "S3 Buckets",
+        title: `Versioning disabled: ${name}`,
+        explanation:
+          `Object versioning is disabled, reducing recovery capability for deletions/overwrites.`,
+        frameworks: ["ISO 27001"],
+        remediation: ["Enable versioning for important data buckets."],
+        severity: "Medium",
+      });
+    }
+    if (b.LoggingEnabled === false) {
+      warnings++;
+      bucketIssues.push({
+        service: "S3 Buckets",
+        title: `Access logging disabled: ${name}`,
+        explanation:
+          `Server access logging is disabled, limiting audit trails and investigations.`,
+        frameworks: ["SOC 2", "ISO 27001"],
+        remediation: ["Enable server access logging to a dedicated log bucket."],
+        severity: "Medium",
+      });
+    }
+
+    if (bucketIssues.length === 0) {
+      passedResources++;
+    } else {
+      useCases.push(...bucketIssues);
+    }
+  }
+
+  // IAM checks
+  const roles: Array<any> = Array.isArray(config?.IAMRoles) ? config!.IAMRoles : [];
+  for (const r of roles) {
+    const roleIssues: Array<UseCase> = [];
+    const roleName = r.RoleName ?? "UnknownRole";
+    const policies: Array<string> = Array.isArray(r.AttachedPolicies) ? r.AttachedPolicies : [];
+
+    const hasAdmin = policies.some(p => /admin/i.test(p));
+    if (hasAdmin) {
+      failed++;
+      roleIssues.push({
+        service: "IAM Roles",
+        title: `Over-privileged role: ${roleName}`,
+        explanation:
+          `Role '${roleName}' has broad administrative permissions, violating least-privilege principles.`,
+        frameworks: ["BNM RMiT", "ISO 27001"],
+        remediation: [
+          "Replace AdministratorAccess with least-privilege scoped policies.",
+          "Use Access Analyzer to detect unused permissions and refactor.",
+        ],
+        severity: "High",
+      });
+    }
+
+    if (r.MFAEnabled === false) {
+      failed++;
+      roleIssues.push({
+        service: "IAM Roles",
+        title: `MFA not enforced: ${roleName}`,
+        explanation:
+          `Role '${roleName}' is used without MFA, increasing account takeover risk.`,
+        frameworks: ["ISO 27001", "SOC 2"],
+        remediation: [
+          "Require MFA for privileged sessions using IAM condition keys.",
+          "Enforce short session durations and remove long‑lived credentials.",
+        ],
+        severity: "High",
+      });
+    }
+
+    if (roleIssues.length === 0) {
+      passedResources++;
+    } else {
+      useCases.push(...roleIssues);
+    }
+  }
+
+  // Lambda checks
+  const lambdas: Array<any> = Array.isArray(config?.LambdaFunctions) ? config!.LambdaFunctions : [];
+  for (const fn of lambdas) {
+    const fnIssues: Array<UseCase> = [];
+    const fnName = fn.FunctionName ?? "UnknownFunction";
+    const env: Record<string, string> = typeof fn.EnvironmentVariables === "object" && fn.EnvironmentVariables ? fn.EnvironmentVariables : {};
+    const envHasSecretsInPlaintext = Object.entries(env).some(([k, v]) =>
+      /(password|token|secret|api_key|apikey|key)/i.test(k) && typeof v === "string"
+    );
+    if (envHasSecretsInPlaintext) {
+      failed++;
+      fnIssues.push({
+        service: "Lambda Functions",
+        title: `Plaintext secrets in env: ${fnName}`,
+        explanation:
+          `Function '${fnName}' stores sensitive values in environment variables without a secrets manager.`,
+        frameworks: ["PDPA 2010", "ISO 27018"],
+        remediation: [
+          "Move secrets to AWS Secrets Manager or SSM Parameter Store (KMS).",
+          "Strip secrets from env and fetch securely at runtime.",
+          "Tighten execution role permissions.",
+        ],
+        severity: "High",
+      });
+    }
+
+    if (typeof fn.Role === "string" && /admin/i.test(fn.Role)) {
+      failed++;
+      fnIssues.push({
+        service: "Lambda Functions",
+        title: `Broad execution role: ${fnName}`,
+        explanation:
+          `Function '${fnName}' assumes a highly privileged role, expanding blast radius.`,
+        frameworks: ["ISO 27001"],
+        remediation: [
+          "Create least‑privilege role scoped to the function's needs.",
+          "Use IAM Access Analyzer to refine actions and resources.",
+        ],
+        severity: "High",
+      });
+    }
+
+    if (fnIssues.length === 0) {
+      passedResources++;
+    } else {
+      useCases.push(...fnIssues);
+    }
+  }
+
+  // If user asked for "more examples", add a couple extra generic detections (kept consistent)
+  const wantsMore = /more examples/i.test(prompt);
+  if (wantsMore) {
+    warnings++;
+    useCases.push({
+      service: "CloudTrail",
+      title: "Insufficient log retention",
+      explanation:
+        "Audit logs retained for less than 90 days reduce forensic visibility.",
+      frameworks: ["ISO 27001", "SOC 2"],
+      remediation: ["Increase retention to >= 365 days and enable immutability."],
+      severity: "Medium",
+    });
+    warnings++;
+    useCases.push({
+      service: "Security Groups",
+      title: "Overly permissive ingress",
+      explanation:
+        "Security group allows 0.0.0.0/0 on sensitive ports, expanding exposure.",
+      frameworks: ["ISO 27001"],
+      remediation: ["Restrict to known CIDRs and required ports only."],
+      severity: "Medium",
+    });
+  }
+
+  const passed = Math.max(0, passedResources);
+  const total = passed + failed + warnings;
+
+  // Simple category scores derived from issue ratios
+  const pct = (ok: number) => (total === 0 ? 100 : Math.max(5, Math.min(95, Math.round((ok / total) * 100))));
+  const securityScore = pct(passed);
+  const governanceScore = pct(passed + Math.floor(warnings / 2));
+  const riskScorePct = Math.max(5, 100 - pct(failed + warnings));
+
+  const summaries = [
+    { label: "Security", percent: securityScore, icon: Shield, color: "text-emerald-500" },
+    { label: "Governance", percent: governanceScore, icon: CheckCircle, color: "text-blue-400" },
+    { label: "Risk", percent: riskScorePct, icon: AlertTriangle, color: "text-amber-500" },
+  ];
+
+  // Curate recommendations from detected use cases
+  const recommendations: Array<string> = [];
+  if (useCases.some(u => u.service === "S3 Buckets" && /Public bucket/i.test(u.title))) {
+    recommendations.push("Enable S3 Block Public Access and audit bucket ACLs and policies.");
+  }
+  if (useCases.some(u => u.service === "S3 Buckets" && /encryption/i.test(u.title))) {
+    recommendations.push("Turn on default S3 encryption (SSE-KMS) with key rotation.");
+  }
+  if (useCases.some(u => u.service === "IAM Roles" && /MFA/i.test(u.title))) {
+    recommendations.push("Require MFA for all privileged roles and enforce session policies.");
+  }
+  if (useCases.some(u => u.service === "IAM Roles" && /Over-privileged/i.test(u.title))) {
+    recommendations.push("Refactor admin policies to least‑privilege using Access Analyzer.");
+  }
+  if (useCases.some(u => u.service === "Lambda Functions" && /Plaintext secrets/i.test(u.title))) {
+    recommendations.push("Migrate secrets to Secrets Manager or SSM, not env variables.");
+  }
+  if (useCases.some(u => u.service === "Lambda Functions" && /execution role/i.test(u.title))) {
+    recommendations.push("Scope Lambda execution roles to minimum required permissions.");
+  }
+  if (useCases.some(u => u.service === "Security Groups")) {
+    recommendations.push("Restrict security group ingress to known CIDRs and required ports.");
+  }
+  if (useCases.some(u => u.service === "CloudTrail")) {
+    recommendations.push("Increase log retention to 365 days and enable immutable storage.");
+  }
+  // Fallback if none detected
+  if (recommendations.length === 0) {
+    recommendations.push(
+      "Enforce MFA for privileged access.",
+      "Enable encryption in transit and at rest for sensitive data.",
+      "Ensure logging/monitoring with adequate retention."
+    );
+  }
+
+  return {
+    prompt,
+    summary: summaries,
+    scanSummary: { passed, failed, warnings, total },
+    standards: [
+      { name: "ISO 27001", issues: failed, riskScore: Math.min(10, Math.max(1, Math.round((failed / Math.max(1, total)) * 10))), group: "security" as const },
+      { name: "GDPR", issues: warnings, riskScore: Math.min(10, Math.max(1, Math.round((warnings / Math.max(1, total)) * 10))), group: "governance" as const },
+      { name: "HIPAA", issues: 0, riskScore: 2, group: "risk" as const },
+      { name: "SOC 2", issues: 0, riskScore: 2, group: "security" as const },
+    ],
+    recommendations,
+    trend: [],
+    useCases,
+  };
+}
+
 function generateMockAnalysis(prompt: string) {
+  // First: try to build from structured config so counts TALLY with provided cases
+  const config = tryParseConfig(prompt);
+  if (config) {
+    return analyzeFromConfig(config, prompt);
+  }
+
   // Convincing but dummy content, seeded by prompt length for variety
   const passed = randomInt(20, 60);
   const failed = randomInt(3, 12);
