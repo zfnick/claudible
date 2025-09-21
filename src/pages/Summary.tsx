@@ -84,6 +84,20 @@ function generateMockAnalysis(prompt: string) {
 // Define a type for viz state
 type Viz = ReturnType<typeof generateMockAnalysis>;
 
+// Add helper to extract the High-level view stats from assistant text
+function extractHighLevelStats(text: string) {
+  const re = /High-level view:\s*(\d+)\s+passed,\s*(\d+)\s+failed,\s*(\d+)\s+warnings\./i;
+  const match = text.match(re);
+  if (!match) return null;
+  const rest = text.replace(re, "").trim();
+  return {
+    passed: Number(match[1]),
+    failed: Number(match[2]),
+    warnings: Number(match[3]),
+    rest,
+  };
+}
+
 export default function Summary() {
   const [messages, setMessages] = useState<Array<Message>>([
     { role: "assistant", content: "Hi, need any security/compliance insights? Ask me anything about audits, risks, or controls." }
@@ -341,19 +355,46 @@ export default function Summary() {
                 <CardTitle className="text-lg text-stone-900">Assistant</CardTitle>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto space-y-4 pr-2">
-                {messages.map((m, idx) => (
-                  <div key={idx} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div
-                      className={`max-w-[80%] px-4 py-2 rounded-2xl border ${
-                        m.role === "user"
-                          ? "bg-stone-800 text-stone-50 border-stone-700"
-                          : "bg-amber-200/80 text-stone-900 border-stone-300"
-                      }`}
-                    >
-                      {m.content}
+                {messages.map((m, idx) => {
+                  const isUser = m.role === "user";
+                  const stats = !isUser ? extractHighLevelStats(m.content) : null;
+                  return (
+                    <div key={idx} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+                      <div
+                        className={`max-w-[80%] px-4 py-2 rounded-2xl border ${
+                          isUser
+                            ? "bg-stone-800 text-stone-50 border-stone-700"
+                            : "bg-amber-200/80 text-stone-900 border-stone-300"
+                        }`}
+                      >
+                        {stats ? (
+                          <>
+                            {/* Remaining assistant text without the High-level view sentence */}
+                            {stats.rest && <div>{stats.rest}</div>}
+
+                            {/* Pretty pills for High-level stats */}
+                            <div className={`mt-2 flex flex-wrap items-center gap-2 ${stats.rest ? "" : ""}`}>
+                              <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-emerald-100 text-emerald-700 border-emerald-200">
+                                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                                {stats.passed} Passed
+                              </span>
+                              <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-rose-100 text-rose-700 border-rose-200">
+                                <span className="h-2 w-2 rounded-full bg-rose-500" />
+                                {stats.failed} Failed
+                              </span>
+                              <span className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium bg-amber-100 text-amber-800 border-amber-200">
+                                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                                {stats.warnings} Warnings
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          m.content
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {/* Interactive loader instead of text bubbles while thinking */}
                 {loading && (
