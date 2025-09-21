@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -436,18 +436,21 @@ export default function Summary() {
 
                     <Progress value={progressPercent} className="h-2 mb-3" />
 
-                    {/* Single-line animated step indicator (completed collapse into ticks, only current step shown) */}
-                    <div className="relative overflow-x-auto whitespace-nowrap no-scrollbar">
-                      <div className="inline-flex items-center gap-3 pr-2">
-                        {/* Only show the current step; completed steps disappear */}
-                        <span
-                          ref={(el) => { stepRefs.current[stepIndex] = el; }}
-                          className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs bg-amber-50 text-amber-800 border-amber-200"
+                    {/* Single-line animated step indicator: show ONLY current step; when it changes, animate old one up & fade out */}
+                    <div className="h-6 relative">
+                      <AnimatePresence mode="wait">
+                        <motion.div
+                          key={steps[stepIndex]}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.25 }}
+                          className="flex items-center gap-2 text-xs text-amber-800"
                         >
                           <Loader2 className="h-3.5 w-3.5 text-amber-600 animate-spin" />
                           <span className="animate-pulse">{steps[stepIndex]}</span>
-                        </span>
-                      </div>
+                        </motion.div>
+                      </AnimatePresence>
                     </div>
                   </div>
                 )}
