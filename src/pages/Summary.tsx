@@ -339,9 +339,6 @@ export default function Summary() {
                     <SendHorizonal className="h-4 w-4" />
                   </Button>
                 </div>
-                <p className="text-xs text-stone-500 mt-2">
-                  Guardrails on: off-topic questions will be declined.
-                </p>
               </div>
             </Card>
           </motion.div>
