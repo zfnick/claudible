@@ -653,23 +653,81 @@ export default function Summary() {
     if (!trimmed) return;
 
     // Always show the user's message
-    setMessages(prev => [...prev, { role: "user", content: trimmed }]);
+    setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setInput("");
 
-    // Guardrail: if off-topic, do not start the checking phase
-    if (!isOnTopic(trimmed)) {
-      setMessages(prev => [
+    // Determine if this is a lightweight follow-up after results are already present
+    const isFollowUp =
+      !!viz &&
+      /^(yes|y|more|explain|details|continue|why|how|elaborate|clarify)\b/i.test(
+        trimmed,
+      );
+
+    // Guardrail: if off-topic AND not a follow-up with an existing viz, don't analyze
+    const onTopic =
+      isOnTopic(trimmed) ||
+      isFollowUp ||
+      (!!viz && trimmed.length <= 64); // allow brief follow-ups when a report exists
+
+    if (!onTopic) {
+      setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           content:
-            "I'm focused on cloud security and compliance. Ask about audits, controls, risks, IAM, encryption, logging/monitoring, or standards like ISO 27001, SOC 2, GDPR, or HIPAA."
+            "I'm focused on cloud security and compliance. Ask about audits, controls, risks, IAM, encryption, logging/monitoring, or standards like ISO 27001, SOC 2, GDPR, or HIPAA.",
         },
       ]);
       return;
     }
 
-    // Proceed with normal analysis flow
+    // If it's a follow-up and we already have results, respond immediately using current viz
+    if (isFollowUp && viz) {
+      const list = viz.useCases ?? [];
+      const top = [...list]
+        .sort((a, b) => {
+          const order: Record<"High" | "Medium" | "Low", number> = {
+            High: 0,
+            Medium: 1,
+            Low: 2,
+          };
+          return order[a.severity] - order[b.severity];
+        })
+        .slice(0, 3);
+
+      const bullets =
+        top.length > 0
+          ? top
+              .map(
+                (u) =>
+                  `• ${u.title} (${u.service}) — ${u.severity} severity${
+                    u.remediation?.length
+                      ? `; remediation: ${u.remediation[0]}`
+                      : ""
+                  }`,
+              )
+              .join("\\n")
+          : "• No issues detected in the latest summary.";
+
+      const nextSteps =
+        viz.recommendations && viz.recommendations.length
+          ? `\\n\\nSuggested next steps:\\n- ${viz.recommendations
+              .slice(0, 3)
+              .join("\\n- ")}`
+          : "";
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            `Here are the top risks detected in your latest analysis:\\n${bullets}${nextSteps}\\n\\nWould you like me to dive deeper into any specific issue or standard?`,
+        },
+      ]);
+      return;
+    }
+
+    // Proceed with normal analysis flow (full run + loader)
     setViz(null);
     setLoading(true);
     setStepIndex(0);
@@ -677,7 +735,7 @@ export default function Summary() {
     const totalDelay = 20000 + Math.random() * 10000; // 20–30s
     const stepInterval = Math.floor(totalDelay / steps.length);
     const interval = setInterval(() => {
-      setStepIndex(prev => {
+      setStepIndex((prev) => {
         if (prev < steps.length - 1) return prev + 1;
         return prev;
       });
@@ -688,10 +746,11 @@ export default function Summary() {
       const result = generateMockAnalysis(trimmed);
       setViz(result);
 
-      // Update completion message to requested copy
-      const response = "Analysis Completed. Your compliance audit summary has been generated. Do you need further explanation?";
+      // Completion message
+      const response =
+        "Analysis Completed. Your compliance audit summary has been generated. Do you need further explanation?";
 
-      setMessages(prev => [...prev, { role: "assistant", content: response }]);
+      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
       setLoading(false);
     }, totalDelay);
   };
