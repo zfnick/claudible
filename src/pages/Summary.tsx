@@ -900,9 +900,18 @@ export default function Summary() {
                               </button>
 
                               {isOpen ? (
-                                <div className="px-4 pb-4">
+                                <div className="px-4 pb-4 space-y-3">
                                   <p className="text-sm text-stone-700">{uc.explanation}</p>
-                                  {/* Intentionally do NOT render frameworks or remediation here per request */}
+                                  {Array.isArray(uc.remediation) && uc.remediation.length > 0 ? (
+                                    <div className="mt-2">
+                                      <div className="text-sm font-semibold text-stone-900 mb-1">What you should do</div>
+                                      <ul className="list-disc pl-5 space-y-1">
+                                        {uc.remediation.map((step, idx) => (
+                                          <li key={idx} className="text-sm text-stone-700">{step}</li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  ) : null}
                                 </div>
                               ) : null}
                             </div>
