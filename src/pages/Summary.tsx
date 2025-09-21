@@ -297,7 +297,7 @@ export default function Summary() {
           >
             <Card className="bg-white border-stone-200 h-[78vh] flex flex-col">
               <CardHeader>
-                <CardTitle className="text-lg">Assistant</CardTitle>
+                <CardTitle className="text-lg text-stone-900">Assistant</CardTitle>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto space-y-4 pr-2">
                 {messages.map((m, idx) => (
