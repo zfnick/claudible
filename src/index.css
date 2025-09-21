@@ -159,17 +159,37 @@
   body * { visibility: hidden; }
   #print-area, #print-area * { visibility: visible; }
 
-  /* Position the print area at the top-left and use full width */
+  /* Make the print area flow naturally (no cropping, no fixed height, no scroll) */
   #print-area {
-    position: absolute !important;
-    inset: 0 0 auto 0 !important;
+    position: static !important;
+    inset: auto !important;
     width: 100% !important;
     margin: 0 !important;
     box-shadow: none !important;
     border: none !important;
     background: white !important;
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
   }
 
-  /* Remove page margins clipping and keep a comfortable page margin */
+  /* Remove inner scroll to print full content */
+  #print-area .overflow-y-auto { 
+    overflow: visible !important; 
+    max-height: none !important;
+  }
+
+  /* Reduce risk of awkward page breaks inside cards/rows */
+  #print-area .rounded-xl,
+  #print-area .border,
+  #print-area table,
+  #print-area tr,
+  #print-area td,
+  #print-area th {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Comfortable page margin */
   @page { margin: 12mm; }
 }

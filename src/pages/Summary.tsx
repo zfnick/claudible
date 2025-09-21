@@ -1007,6 +1007,60 @@ export default function Summary() {
                 </div>
               ) : null}
 
+              {/* Print-only: compact KPI + findings table for a data-rich PDF */}
+              {viz ? (
+                <div className="print-only px-6 pb-4">
+                  <div className="mt-2 grid grid-cols-3 gap-4">
+                    <div className="border rounded-lg p-3">
+                      <div className="text-xs text-stone-600">Critical Issues</div>
+                      <div className="text-xl font-bold text-rose-700">{counts.critical}</div>
+                    </div>
+                    <div className="border rounded-lg p-3">
+                      <div className="text-xs text-stone-600">Medium Risks</div>
+                      <div className="text-xl font-bold text-amber-700">{counts.medium}</div>
+                    </div>
+                    <div className="border rounded-lg p-3">
+                      <div className="text-xs text-stone-600">Compliant</div>
+                      <div className="text-xl font-bold text-emerald-700">{counts.compliant}</div>
+                    </div>
+                  </div>
+
+                  {(() => {
+                    const total = counts.critical + counts.medium + counts.compliant || 1;
+                    const critPct = Math.round((counts.critical / total) * 100);
+                    const medPct = Math.round((counts.medium / total) * 100);
+                    const compPct = Math.max(0, 100 - critPct - medPct);
+                    return (
+                      <div className="mt-3 text-sm text-stone-800">
+                        Severity distribution: Critical {critPct}%, Medium {medPct}%, Compliant {compPct}%.
+                      </div>
+                    );
+                  })()}
+
+                  <div className="mt-4">
+                    <div className="text-sm font-semibold mb-1">Detailed Findings</div>
+                    <table className="w-full text-sm border border-stone-200">
+                      <thead className="bg-stone-100">
+                        <tr>
+                          <th className="text-left p-2 border-b border-stone-200">Service</th>
+                          <th className="text-left p-2 border-b border-stone-200">Severity</th>
+                          <th className="text-left p-2 border-b border-stone-200">Title</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sortedUseCases.map((u, i) => (
+                          <tr key={i} className="align-top">
+                            <td className="p-2 border-b border-stone-100">{u.service}</td>
+                            <td className="p-2 border-b border-stone-100">{u.severity}</td>
+                            <td className="p-2 border-b border-stone-100">{u.title}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : null}
+
               {/* Scrollable content area */}
               <CardContent className="flex-1 overflow-y-auto space-y-6">
                 {/* Loading skeleton visuals while thinking */}
