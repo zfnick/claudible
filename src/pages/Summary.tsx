@@ -835,7 +835,8 @@ export default function Summary() {
                           const compPct = Math.max(0, 100 - critPct - medPct);
                           return (
                             <div className="space-y-3">
-                              <div className="h-3 w-full rounded-full overflow-hidden bg-stone-200 border border-stone-300">
+                              {/* Make this a true horizontal stacked bar */}
+                              <div className="h-3 w-full rounded-full overflow-hidden bg-stone-200 border border-stone-300 flex">
                                 <div className="h-full bg-rose-500" style={{ width: `${critPct}%` }} />
                                 <div className="h-full bg-amber-500" style={{ width: `${medPct}%` }} />
                                 <div className="h-full bg-emerald-500" style={{ width: `${compPct}%` }} />
