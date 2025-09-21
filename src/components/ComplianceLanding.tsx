@@ -130,22 +130,22 @@ export default function ComplianceLanding({ onStartScan }: ComplianceLandingProp
               {/* Provider logos */}
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-6 place-items-center">
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg"
+                  src="https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg"
                   alt="AWS"
                   className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
                 />
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg"
+                  src="https://www.vectorlogo.zone/logos/microsoft_azure/microsoft_azure-icon.svg"
                   alt="Azure"
                   className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
                 />
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Google_Cloud_logo.svg"
+                  src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg"
                   alt="Google Cloud"
                   className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
                 />
                 <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Alibaba_Cloud_logo.svg"
+                  src="https://www.vectorlogo.zone/logos/alibabacloud/alibabacloud-icon.svg"
                   alt="Alibaba Cloud"
                   className="h-16 w-auto bg-white rounded-md p-3 border border-stone-200"
                 />
