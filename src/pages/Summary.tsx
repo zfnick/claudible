@@ -778,6 +778,48 @@ export default function Summary() {
       const order: Record<"High" | "Medium" | "Low", number> = { High: 0, Medium: 1, Low: 2 };
       const top = [...list].sort((a, b) => order[a.severity] - order[b.severity]).slice(0, 3);
 
+      // Acknowledgements only: avoid repeating the same top risks
+      const onlyAck = /^(sure|ok(?:ay)?|yes|y)$/i.test(trimmed);
+      if (onlyAck) {
+        typeOut(
+          "Which item should I expand? For example:\n" +
+          "• explain S3 public access\n" +
+          "• expand IAM admin role\n" +
+          "• show Lambda secrets issue\n\n" +
+          "You can also ask about a standard (e.g., ISO 27001, PDPA 2010)."
+        );
+        return;
+      }
+
+      // Targeted detail if the follow-up mentions existing items in the report
+      const listLower = list.map(u => ({
+        ...u,
+        _service: u.service.toLowerCase(),
+        _title: u.title.toLowerCase(),
+        _frameworks: Array.isArray(u.frameworks) ? u.frameworks.map(f => f.toLowerCase()) : [],
+      }));
+
+      const matches = listLower.filter(u =>
+        u._service.includes(text) ||
+        u._title.includes(text) ||
+        u._frameworks.some(f => text.includes(f))
+      );
+
+      if (matches.length > 0) {
+        const details = matches.map(u => {
+          const fw = (u.frameworks?.length ? `\nViolations:\n- ${u.frameworks.join("\n- ")}` : "");
+          const rem = (u.remediation?.length ? `\nWhat you should do:\n- ${u.remediation.join("\n- ")}` : "");
+          return `• ${u.title} (${u.service}) — ${u.severity} severity\n` +
+                 `Explanation: ${u.explanation}${fw}${rem}`;
+        }).join("\n\n");
+
+        typeOut(
+          `Here are the details related to your request:\n\n${details}\n\n` +
+          `Would you like me to expand another item or framework?`
+        );
+        return;
+      }
+
       // If user asked to "summarize", produce a tight summary using existing counts
       const wantsSummary = /\b(summarize|summary|summarise)\b/i.test(trimmed);
       if (wantsSummary) {
@@ -812,7 +854,7 @@ export default function Summary() {
         return;
       }
 
-      // Default lightweight explanation: top risks + next steps
+      // Default lightweight explanation: top risks + next steps (kept as fallback)
       const bullets =
         top.length > 0
           ? top.map(u =>
