@@ -62,10 +62,10 @@ export default function Dashboard() {
               alt="Claudible logo"
               className="h-8 w-8 object-contain"
             />
-            <span className="font-semibold tracking-wide">CLAUDIBLE</span>
+            <span className="font-semibold tracking-wide text-stone-900">CLAUDIBLE</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/" className="text-sm underline">Home</Link>
+            <Link to="/" className="text-sm underline text-stone-700">Home</Link>
             <div className="flex items-center gap-2">
               <span className="text-sm text-stone-700">Terry Ong</span>
               <div className="h-8 w-8 rounded-full bg-stone-200 border border-stone-300" />
@@ -87,7 +87,7 @@ export default function Dashboard() {
             <Card className="bg-amber-200/60 border-stone-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl tracking-tight font-bold">Your cloud platforms</h2>
+                  <h2 className="text-2xl tracking-tight font-bold text-stone-900">Your cloud platforms</h2>
                   <button
                     className="text-sm inline-flex items-center gap-2 text-stone-800 hover:opacity-80"
                     onClick={() => navigate("/providers")}
@@ -133,7 +133,7 @@ export default function Dashboard() {
           >
             <Card className="bg-amber-200/60 border-stone-300">
               <CardContent className="p-6">
-                <h2 className="text-2xl tracking-tight font-bold mb-4">Notifications</h2>
+                <h2 className="text-2xl tracking-tight font-bold text-stone-900 mb-4">Notifications</h2>
 
                 <div className="bg-white/90 border border-stone-200 rounded-2xl p-4">
                   {notifications.length === 0 ? (
