@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -52,7 +52,6 @@ export default function SimpleLogin() {
             <form onSubmit={handleSubmit}>
               <CardHeader>
                 <CardTitle className="text-xl text-stone-900">Welcome back</CardTitle>
-                <CardDescription className="text-stone-700">Use test@test.com / test123</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
