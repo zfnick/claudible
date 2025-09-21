@@ -11,7 +11,7 @@ export default function Landing() {
             <div className="h-8 w-8 rounded-full grid place-items-center border border-stone-300">
               <span className="text-xs">✳</span>
             </div>
-            <span className="font-semibold tracking-wide">CLAUDIBLE</span>
+            <span className="font-semibold tracking-wide text-stone-900">CLAUDIBLE</span>
           </div>
           <div className="flex items-center gap-4">
             <span className="hidden sm:block text-sm text-stone-500">Already have an account?</span>
@@ -34,7 +34,7 @@ export default function Landing() {
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
-            <h1 className="text-5xl md:text-6xl tracking-tight font-bold">
+            <h1 className="text-5xl md:text-6xl tracking-tight font-bold text-stone-900">
               Is Your Cloud
               <span className="block">Audit-Ready?</span>
             </h1>
