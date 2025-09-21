@@ -333,6 +333,7 @@ export default function Summary() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !loading) send();
                     }}
+                    className="bg-white text-stone-900 placeholder:text-stone-500"
                   />
                   <Button onClick={send} disabled={loading || !input.trim()} className="gap-1 bg-stone-800 hover:bg-stone-900">
                     <SendHorizonal className="h-4 w-4" />
