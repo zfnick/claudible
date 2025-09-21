@@ -236,7 +236,7 @@ export default function Summary() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <Card className="bg-white/70 border-stone-200">
                         <CardHeader>
-                          <CardTitle className="text-base">Compliance Overview</CardTitle>
+                          <CardTitle className="text-base text-stone-900">Compliance Overview</CardTitle>
                         </CardHeader>
                         <CardContent>
                           <ResponsiveContainer width="100%" height={260}>
@@ -253,7 +253,7 @@ export default function Summary() {
                       </Card>
                       <Card className="bg-white/70 border-stone-200">
                         <CardHeader>
-                          <CardTitle className="text-base">Issues by Standard</CardTitle>
+                          <CardTitle className="text-base text-stone-900">Issues by Standard</CardTitle>
                         </CardHeader>
                         <CardContent>
                           <ResponsiveContainer width="100%" height={260}>
@@ -272,7 +272,7 @@ export default function Summary() {
                     {/* Recommendations */}
                     <Card className="bg-white/70 border-stone-200">
                       <CardHeader>
-                        <CardTitle className="text-base">What you should do</CardTitle>
+                        <CardTitle className="text-base text-stone-900">What you should do</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <ul className="list-disc pl-5 space-y-2 text-stone-800">
