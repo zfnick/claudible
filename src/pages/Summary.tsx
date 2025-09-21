@@ -708,18 +708,57 @@ export default function Summary() {
     setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
     setInput("");
 
-    // Determine if this is a lightweight follow-up after results are already present
+    // Build context-aware lightweight follow-up detection using existing dashboard data
+    const hasViz = !!viz;
+    const text = trimmed.toLowerCase();
+
+    // Words that imply re-running a scan or new scope
+    const reanalysisHints: Array<string> = [
+      "scan", "scanning", "re-scan", "rescan", "analyze", "analysis", "re-run", "rerun",
+      "check again", "recheck", "new provider", "add provider", "another provider", "start over",
+      "fresh", "full check", "do a full", "{", "}",
+    ];
+
+    // Short generic acknowledgements or follow-ups that should not trigger re-analysis
+    const lightweightAcks: Array<string> = [
+      "summarize", "summary", "summarise", "explain", "details", "clarify", "why", "how",
+      "more", "more info", "continue", "tell me more", "elaborate", "sure", "ok", "okay",
+      "yes", "y", "what is", "define", "break down", "breakdown"
+    ];
+
+    // Extract keywords from current viz to determine if the user refers to existing content
+    const vizServices: Array<string> = hasViz ? Array.from(new Set((viz!.useCases ?? []).map(u => u.service.toLowerCase()))) : [];
+    const vizFrameworks: Array<string> = hasViz ? Array.from(new Set((viz!.useCases ?? []).flatMap(u => (u.frameworks ?? []).map(f => f.toLowerCase())))) : [];
+    const vizTitles: Array<string> = hasViz ? Array.from(new Set((viz!.useCases ?? []).map(u => u.title.toLowerCase()))) : [];
+
+    const mentionsExistingService = hasViz && vizServices.some(s => text.includes(s));
+    const mentionsExistingFramework = hasViz && vizFrameworks.some(f => text.includes(f));
+    const mentionsExistingTitle = hasViz && vizTitles.some(t => text.includes(t));
+
+    // Consider it a lightweight follow-up if:
+    // - We already have viz AND:
+    //   - user uses follow-up/ack phrasing OR
+    //   - user references existing services/frameworks/titles OR
+    //   - message is short and not clearly asking for a new scan
+    const clearlyAsksReanalysis = reanalysisHints.some(h => text.includes(h));
+    const hasLightweightCue = lightweightAcks.some(w => text.includes(w));
+    const isShort = trimmed.length <= 96;
+
     const isFollowUp =
-      !!viz &&
-      /^(yes|y|more|explain|details|continue|why|how|elaborate|clarify|summarize|summary|summarise)\b/i.test(
-        trimmed,
+      hasViz &&
+      (
+        hasLightweightCue ||
+        mentionsExistingService ||
+        mentionsExistingFramework ||
+        mentionsExistingTitle ||
+        (isShort && !clearlyAsksReanalysis)
       );
 
-    // Guardrail: if off-topic AND not a follow-up with an existing viz, don't analyze
+    // Guardrail: on-topic OR allow short follow-ups when a report exists
     const onTopic =
       isOnTopic(trimmed) ||
       isFollowUp ||
-      (!!viz && trimmed.length <= 64); // allow brief follow-ups when a report exists
+      (hasViz && isShort);
 
     if (!onTopic) {
       setMessages((prev) => [
@@ -736,41 +775,61 @@ export default function Summary() {
     // If it's a follow-up and we already have results, respond immediately using current viz
     if (isFollowUp && viz) {
       const list = viz.useCases ?? [];
-      const top = [...list]
-        .sort((a, b) => {
-          const order: Record<"High" | "Medium" | "Low", number> = {
-            High: 0,
-            Medium: 1,
-            Low: 2,
-          };
-          return order[a.severity] - order[b.severity];
-        })
-        .slice(0, 3);
+      const order: Record<"High" | "Medium" | "Low", number> = { High: 0, Medium: 1, Low: 2 };
+      const top = [...list].sort((a, b) => order[a.severity] - order[b.severity]).slice(0, 3);
 
+      // If user asked to "summarize", produce a tight summary using existing counts
+      const wantsSummary = /\b(summarize|summary|summarise)\b/i.test(trimmed);
+      if (wantsSummary) {
+        const { critical, medium, compliant } = {
+          critical: list.filter(u => u.severity === "High").length,
+          medium: list.filter(u => u.severity === "Medium").length,
+          compliant: list.filter(u => u.severity === "Low").length,
+        };
+
+        const bullets =
+          top.length > 0
+            ? top.map(u =>
+                `• ${u.title} (${u.service}) — ${u.severity} severity${
+                  u.remediation?.length ? `; remediation: ${u.remediation[0]}` : ""
+                }`
+              ).join("\n")
+            : "• No issues detected in the latest summary.";
+
+        const nextSteps =
+          viz.recommendations && viz.recommendations.length
+            ? `\n\nSuggested next steps:\n- ${viz.recommendations.slice(0, 3).join("\n- ")}`
+            : "";
+
+        typeOut(
+          `Here's a quick summary of your current audit results:\n` +
+          `• Critical Issues: ${critical}\n` +
+          `• Medium Risks: ${medium}\n` +
+          `• Compliant: ${compliant}\n\n` +
+          `Top highlighted items:\n${bullets}${nextSteps}\n\n` +
+          `Would you like me to expand on any specific issue or framework?`
+        );
+        return;
+      }
+
+      // Default lightweight explanation: top risks + next steps
       const bullets =
         top.length > 0
-          ? top
-              .map(
-                (u) =>
-                  `• ${u.title} (${u.service}) — ${u.severity} severity${
-                    u.remediation?.length
-                      ? `; remediation: ${u.remediation[0]}`
-                      : ""
-                  }`,
-              )
-              .join("\n")
+          ? top.map(u =>
+              `• ${u.title} (${u.service}) — ${u.severity} severity${
+                u.remediation?.length ? `; remediation: ${u.remediation[0]}` : ""
+              }`
+            ).join("\n")
           : "• No issues detected in the latest summary.";
 
       const nextSteps =
         viz.recommendations && viz.recommendations.length
-          ? `\n\nSuggested next steps:\n- ${viz.recommendations
-              .slice(0, 3)
-              .join("\n- ")}`
+          ? `\n\nSuggested next steps:\n- ${viz.recommendations.slice(0, 3).join("\n- ")}`
           : "";
 
-      // Replace immediate push with natural typing animation
       typeOut(
-        `Here are the top risks detected in your latest analysis:\n${bullets}${nextSteps}\n\nWould you like me to dive deeper into any specific issue or standard?`,
+        `Here are the top risks detected in your latest analysis:\n${bullets}${nextSteps}\n\n` +
+        `Would you like me to dive deeper into any specific issue or standard?`
       );
       return;
     }
@@ -794,11 +853,9 @@ export default function Summary() {
       const result = generateMockAnalysis(trimmed);
       setViz(result);
 
-      // Completion message (now typed out)
       const response =
         "Analysis Completed. Your compliance audit summary has been generated. Do you need further explanation?";
 
-      // Replace immediate push with natural typing animation
       typeOut(response);
       setLoading(false);
     }, totalDelay);
