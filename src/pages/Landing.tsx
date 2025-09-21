@@ -56,28 +56,37 @@ export default function Landing() {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-8 place-items-center"
+            className="grid grid-cols-2 lg:grid-cols-2 gap-10 sm:gap-12 place-items-center"
           >
-            <img
-              src="https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg"
-              alt="AWS"
-              className="h-24 w-auto bg-white rounded-md p-4 border border-stone-200 shadow-sm"
-            />
-            <img
-              src="https://www.vectorlogo.zone/logos/microsoft_azure/microsoft_azure-icon.svg"
-              alt="Azure"
-              className="h-24 w-auto bg-white rounded-md p-4 border border-stone-200 shadow-sm"
-            />
-            <img
-              src="https://www.vectorlogo.zone/logos/alibabacloud/alibabacloud-icon.svg"
-              alt="Alibaba Cloud"
-              className="h-24 w-auto bg-white rounded-md p-4 border border-stone-200 shadow-sm"
-            />
-            <img
-              src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg"
-              alt="Google Cloud"
-              className="h-24 w-auto bg-white rounded-md p-4 border border-stone-200 shadow-sm"
-            />
+            {/* Provider icon cards: bigger, rounded, subtle shadow */}
+            <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl bg-white/95 border border-stone-200 shadow-md flex items-center justify-center hover:shadow-lg hover:-translate-y-0.5 transition">
+              <img
+                src="https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg"
+                alt="AWS"
+                className="h-16 sm:h-20 w-auto"
+              />
+            </div>
+            <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl bg-white/95 border border-stone-200 shadow-md flex items-center justify-center hover:shadow-lg hover:-translate-y-0.5 transition">
+              <img
+                src="https://www.vectorlogo.zone/logos/microsoft_azure/microsoft_azure-icon.svg"
+                alt="Azure"
+                className="h-16 sm:h-20 w-auto"
+              />
+            </div>
+            <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl bg-white/95 border border-stone-200 shadow-md flex items-center justify-center hover:shadow-lg hover:-translate-y-0.5 transition">
+              <img
+                src="https://www.vectorlogo.zone/logos/alibabacloud/alibabacloud-icon.svg"
+                alt="Alibaba Cloud"
+                className="h-16 sm:h-20 w-auto"
+              />
+            </div>
+            <div className="h-28 w-28 sm:h-32 sm:w-32 rounded-2xl bg-white/95 border border-stone-200 shadow-md flex items-center justify-center hover:shadow-lg hover:-translate-y-0.5 transition">
+              <img
+                src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg"
+                alt="Google Cloud"
+                className="h-16 sm:h-20 w-auto"
+              />
+            </div>
           </motion.div>
         </div>
       </main>
