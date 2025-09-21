@@ -30,17 +30,22 @@ function generateMockAnalysis(prompt: string) {
   const warnings = randomInt(2, 10);
   const total = passed + failed + warnings;
 
+  // Categorize into Security, Governance, Risk
+  const securityScore = randomInt(40, 92);
+  const governanceScore = randomInt(35, 90);
+  const riskScorePct = randomInt(20, 75);
+
   const standards = [
-    { name: "ISO 27001", issues: randomInt(0, 8), riskScore: Number((Math.random() * 9 + 1).toFixed(1)) },
-    { name: "GDPR", issues: randomInt(0, 6), riskScore: Number((Math.random() * 7 + 1).toFixed(1)) },
-    { name: "HIPAA", issues: randomInt(0, 7), riskScore: Number((Math.random() * 8 + 1).toFixed(1)) },
-    { name: "SOC 2", issues: randomInt(0, 5), riskScore: Number((Math.random() * 6 + 1).toFixed(1)) },
+    { name: "ISO 27001", issues: randomInt(0, 8), riskScore: Number((Math.random() * 9 + 1).toFixed(1)), group: "security" as const },
+    { name: "GDPR", issues: randomInt(0, 6), riskScore: Number((Math.random() * 7 + 1).toFixed(1)), group: "governance" as const },
+    { name: "HIPAA", issues: randomInt(0, 7), riskScore: Number((Math.random() * 8 + 1).toFixed(1)), group: "risk" as const },
+    { name: "SOC 2", issues: randomInt(0, 5), riskScore: Number((Math.random() * 6 + 1).toFixed(1)), group: "security" as const },
   ];
 
   const summaries = [
-    { label: "Security Posture", percent: randomInt(40, 92), icon: Shield, color: "text-emerald-500" },
-    { label: "Governance", percent: randomInt(35, 90), icon: CheckCircle, color: "text-blue-400" },
-    { label: "Risk Exposure", percent: randomInt(20, 75), icon: AlertTriangle, color: "text-amber-500" },
+    { label: "Security", percent: securityScore, icon: Shield, color: "text-emerald-500" },
+    { label: "Governance", percent: governanceScore, icon: CheckCircle, color: "text-blue-400" },
+    { label: "Risk", percent: riskScorePct, icon: AlertTriangle, color: "text-amber-500" },
   ];
 
   const recs = [
@@ -62,6 +67,9 @@ function generateMockAnalysis(prompt: string) {
   };
 }
 
+// Define a type for viz state
+type Viz = ReturnType<typeof generateMockAnalysis>;
+
 export default function Summary() {
   const [messages, setMessages] = useState<Array<Message>>([
     { role: "assistant", content: "Hi, need any security/compliance insights? Ask me anything about audits, risks, or controls." }
@@ -69,14 +77,17 @@ export default function Summary() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Visualization state
-  const [viz, setViz] = useState(() => generateMockAnalysis("initial"));
+  // Visualization state: start EMPTY until a valid question arrives
+  const [viz, setViz] = useState<Viz | null>(null);
 
-  const pieData = useMemo(() => ([
-    { name: "Passed", value: viz.scanSummary.passed, color: "#10b981" },
-    { name: "Failed", value: viz.scanSummary.failed, color: "#ef4444" },
-    { name: "Warnings", value: viz.scanSummary.warnings, color: "#f59e0b" },
-  ]), [viz]);
+  const pieData = useMemo(
+    () => viz ? ([
+      { name: "Passed", value: viz.scanSummary.passed, color: "#10b981" },
+      { name: "Failed", value: viz.scanSummary.failed, color: "#ef4444" },
+      { name: "Warnings", value: viz.scanSummary.warnings, color: "#f59e0b" },
+    ]) : [],
+    [viz]
+  );
 
   const send = async () => {
     const trimmed = input.trim();
@@ -95,7 +106,7 @@ export default function Summary() {
           {
             role: "assistant",
             content:
-              "I’m focused on security and compliance topics (e.g., ISO 27001, SOC 2, GDPR, HIPAA, IAM, encryption, audit logs). Please rephrase your question in that scope."
+              "I'm focused on security and compliance topics (e.g., ISO 27001, SOC 2, GDPR, HIPAA, IAM, encryption, audit logs). Please rephrase your question in that scope."
           }
         ]);
         setLoading(false);
@@ -127,11 +138,12 @@ export default function Summary() {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const barData = useMemo(
-    () => viz.standards.map(s => ({ name: s.name, issues: s.issues, riskScore: s.riskScore })),
+    () => viz ? viz.standards.map(s => ({ name: s.name, issues: s.issues, riskScore: s.riskScore })) : [],
     [viz]
   );
 
   const downloadReport = () => {
+    if (!viz) return;
     const blob = new Blob([JSON.stringify(viz, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -158,90 +170,101 @@ export default function Summary() {
 
       <main className="max-w-7xl mx-auto px-6 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left: Visualization */}
+          {/* Left: Visualization (fixed height + scrollable; initially empty) */}
           <motion.div
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
             className="lg:col-span-7"
           >
-            <Card className="bg-amber-200/60 border-stone-300">
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="bg-amber-200/60 border-stone-300 h-[78vh] flex flex-col overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between shrink-0">
                 <CardTitle className="text-3xl tracking-tight">Summary</CardTitle>
-                <Button variant="outline" onClick={downloadReport} className="gap-2">
+                <Button
+                  variant="outline"
+                  onClick={downloadReport}
+                  className="gap-2 disabled:opacity-50"
+                  disabled={!viz}
+                >
                   <Download className="h-4 w-4" /> Download JSON
                 </Button>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* KPI pills */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {viz.summary.map((s, idx) => (
-                    <div key={idx} className="flex items-center gap-3 bg-white/60 border border-stone-200 rounded-xl p-4">
-                      <s.icon className={`h-5 w-5 ${s.color}`} />
-                      <div className="flex-1">
-                        <div className="text-sm text-stone-600">{s.label}</div>
-                        <div className="font-semibold">{s.percent}%</div>
-                      </div>
-                      <Badge className="bg-stone-800 text-stone-100">{s.percent}%</Badge>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card className="bg-white/70 border-stone-200">
-                    <CardHeader>
-                      <CardTitle className="text-base">Compliance Overview</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={260}>
-                        <PieChart>
-                          <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value">
-                            {pieData.map((e, i) => (
-                              <Cell key={i} fill={e.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-white/70 border-stone-200">
-                    <CardHeader>
-                      <CardTitle className="text-base">Issues by Standard</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={260}>
-                        <BarChart data={barData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="issues" fill="#f59e0b" radius={[6, 6, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Recommendations */}
-                <Card className="bg-white/70 border-stone-200">
-                  <CardHeader>
-                    <CardTitle className="text-base">What you should do</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="list-disc pl-5 space-y-2 text-stone-800">
-                      {viz.recommendations.map((r, i) => (
-                        <li key={i}>{r}</li>
+              {/* Scrollable content area */}
+              <CardContent className="flex-1 overflow-y-auto space-y-6">
+                {!viz ? null : (
+                  <>
+                    {/* KPI pills: Security, Governance, Risk */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {viz.summary.map((s, idx) => (
+                        <div key={idx} className="flex items-center gap-3 bg-white/60 border border-stone-200 rounded-xl p-4">
+                          <s.icon className={`h-5 w-5 ${s.color}`} />
+                          <div className="flex-1">
+                            <div className="text-sm text-stone-600">{s.label}</div>
+                            <div className="font-semibold">{s.percent}%</div>
+                          </div>
+                          <Badge className="bg-stone-800 text-stone-100">{s.percent}%</Badge>
+                        </div>
                       ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                    </div>
+
+                    {/* Charts */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <Card className="bg-white/70 border-stone-200">
+                        <CardHeader>
+                          <CardTitle className="text-base">Compliance Overview</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={260}>
+                            <PieChart>
+                              <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value">
+                                {pieData.map((e, i) => (
+                                  <Cell key={i} fill={e.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-white/70 border-stone-200">
+                        <CardHeader>
+                          <CardTitle className="text-base">Issues by Standard</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ResponsiveContainer width="100%" height={260}>
+                            <BarChart data={barData}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" />
+                              <YAxis />
+                              <Tooltip />
+                              <Bar dataKey="issues" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Recommendations */}
+                    <Card className="bg-white/70 border-stone-200">
+                      <CardHeader>
+                        <CardTitle className="text-base">What you should do</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="list-disc pl-5 space-y-2 text-stone-800">
+                          {viz.recommendations.map((r, i) => (
+                            <li key={i}>{r}</li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Right: Chatbot */}
+          {/* Right: Chatbot (unchanged height) */}
           <motion.div
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
