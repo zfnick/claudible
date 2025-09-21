@@ -324,11 +324,168 @@ function analyzeFromConfig(config: ReturnType<typeof tryParseConfig>, prompt: st
   };
 }
 
+// Add: Malaysia-focused use cases builder
+function buildMalaysiaUseCases() {
+  return [
+    {
+      service: "S3 Buckets",
+      title: "S3 Bucket Public Access Risk",
+      explanation:
+        "S3 bucket 'customer-data' has public read access enabled, potentially exposing sensitive customer information. This violates Malaysia NCCP 2025 Pillar 3 (Secure Data Protection) and Data Sharing Act 2025 requirements for confidential data handling. For auditors: This bucket contains customer data accessible publicly, violating Malaysian data sovereignty requirements under NCCP 2025. The Data Sharing Act 2025 mandates strict access controls for personal data, and this configuration poses significant compliance risks.",
+      frameworks: [
+        "Malaysia NCCP 2025 - Pillar 3 (Data Residency)",
+        "Data Sharing Act 2025 - Section 12 (Data Classification)",
+        "Cybersecurity Act 2024 - NCII Requirements",
+      ],
+      remediation: [
+        "Remove public access permissions and deny public bucket policies.",
+        "Implement bucket-level encryption and enforce TLS in transit.",
+        "Migrate to Malaysia region (ap-southeast-3).",
+        "Configure proper IAM policies for controlled access.",
+      ],
+      severity: "High" as const,
+    },
+    {
+      service: "IAM Roles",
+      title: "IAM Administrative Role Over-Privileges",
+      explanation:
+        "IAM role 'AdminRole' has excessive administrative privileges without proper MFA enforcement or session duration limits. This violates Cybersecurity Act 2024 requirements for National Critical Information Infrastructure (NCII) access controls. For auditors: This role provides unrestricted administrative access without adequate security controls, violating CSA 2024 requirements for critical infrastructure protection and NCCP 2025 access management standards.",
+      frameworks: [
+        "Cybersecurity Act 2024 - Section 15 (NCII Security)",
+        "Malaysia NCCP 2025 - Pillar 4 (Access Management)",
+        "MyDIGITAL Framework - Digital Security Standards",
+      ],
+      remediation: [
+        "Implement least-privilege access; remove broad admin policies.",
+        "Enforce MFA for all administrative access.",
+        "Set maximum session duration to 1 hour.",
+        "Enable comprehensive audit logging aligned with NACSA.",
+      ],
+      severity: "High" as const,
+    },
+    {
+      service: "IAM Roles",
+      title: "IAM Read-Only Role Missing Audit Trail",
+      explanation:
+        "IAM role 'ReadOnlyRole' lacks comprehensive audit logging and proper data classification tagging required under Data Sharing Act 2025 for government data access. For auditors: While this role has limited permissions, it lacks the audit trail required by Data Sharing Act 2025 for tracking government data access and doesn't implement proper data classification controls.",
+      frameworks: [
+        "Data Sharing Act 2025 - Section 8 (Audit Requirements)",
+        "Malaysia NCCP 2025 - Pillar 5 (Monitoring & Compliance)",
+        "ISO 27017 - Cloud Audit Controls",
+      ],
+      remediation: [
+        "Enable CloudTrail logging for all role activities.",
+        "Implement data classification tags for access visibility.",
+        "Establish inter-agency access policies and reviews.",
+      ],
+      severity: "Medium" as const,
+    },
+    {
+      service: "Lambda Functions",
+      title: "Lambda Function Data Processing Non-Compliance",
+      explanation:
+        "Lambda function 'ProcessCustomerData' processes personal data outside Malaysia region without NCCP 2025 data residency requirements and lacks proper encryption in transit and at rest. For auditors: This violates Malaysia data sovereignty requirements and MyDIGITAL security controls.",
+      frameworks: [
+        "Malaysia NCCP 2025 - Pillar 3 (Data Residency)",
+        "MyDIGITAL Framework - Data Security Requirements",
+        "Data Sharing Act 2025 - Personal Data Protection",
+      ],
+      remediation: [
+        "Migrate function to Malaysia region (ap-southeast-3).",
+        "Implement end-to-end encryption (in transit and at rest).",
+        "Add data classification handling and controls.",
+      ],
+      severity: "Medium" as const,
+    },
+    {
+      service: "Lambda Functions",
+      title: "Lambda Report Generation Security Gap",
+      explanation:
+        "Lambda function 'GenerateReports' generates audit reports without proper data retention policies and lacks NACSA reporting integration under Cybersecurity Act 2024. For auditors: Does not meet CSA 2024 NACSA incident reporting and lacks data retention controls.",
+      frameworks: [
+        "Cybersecurity Act 2024 - NACSA Reporting Requirements",
+        "Malaysia NCCP 2025 - Pillar 5 (Compliance Monitoring)",
+        "Data Sharing Act 2025 - Data Retention Standards",
+      ],
+      remediation: [
+        "Implement data retention policies aligned to Malaysian regulations.",
+        "Add NACSA-compliant reporting capabilities.",
+        "Enable comprehensive logging and migrate to ap-southeast-3.",
+      ],
+      severity: "Medium" as const,
+    },
+    {
+      service: "S3 Buckets",
+      title: "S3 Internal Documentation Bucket Compliant",
+      explanation:
+        "S3 bucket 'internal-docs' properly implements NCCP 2025 encryption standards, is in Malaysia region (ap-southeast-3), and has appropriate access controls. For auditors: Demonstrates proper implementation of NCCP 2025 data residency and encryption requirements.",
+      frameworks: [
+        "Malaysia NCCP 2025 - Pillar 3 (Data Residency)",
+        "Data Sharing Act 2025 - Data Classification",
+      ],
+      remediation: [
+        "Maintain current configuration.",
+        "Continue scheduled access reviews per NCCP guidelines.",
+      ],
+      severity: "Low" as const,
+    },
+  ];
+}
+
 function generateMockAnalysis(prompt: string) {
   // First: try to build from structured config so counts TALLY with provided cases
   const config = tryParseConfig(prompt);
   if (config) {
     return analyzeFromConfig(config, prompt);
+  }
+
+  // NEW: If the prompt references Malaysia/NCCP/CSA/etc., return those specific use cases and derive counts
+  const matchesMalaysia = /(Malaysia|NCCP|Cybersecurity Act 2024|Data Sharing Act 2025|NACSA|MyDIGITAL|S3 Bucket Public Access Risk)/i.test(
+    prompt,
+  );
+  if (matchesMalaysia) {
+    const useCases = buildMalaysiaUseCases();
+
+    // Derive counts by severity: High = failed, Medium = warnings, Low = passed
+    const failed = useCases.filter((u) => u.severity === "High").length;
+    const warnings = useCases.filter((u) => u.severity === "Medium").length;
+    const passed = useCases.filter((u) => u.severity === "Low").length;
+    const total = failed + warnings + passed;
+
+    const pct = (ok: number) =>
+      total === 0 ? 100 : Math.max(5, Math.min(95, Math.round((ok / total) * 100)));
+    const securityScore = pct(passed);
+    const governanceScore = pct(passed + Math.floor(warnings / 2));
+    const riskScorePct = Math.max(5, 100 - pct(failed + warnings));
+
+    const summaries = [
+      { label: "Security", percent: securityScore, icon: Shield, color: "text-emerald-500" },
+      { label: "Governance", percent: governanceScore, icon: CheckCircle, color: "text-blue-400" },
+      { label: "Risk", percent: riskScorePct, icon: AlertTriangle, color: "text-amber-500" },
+    ];
+
+    // Simple standards placeholder (kept consistent with app display)
+    const standards = [
+      { name: "ISO 27001", issues: failed, riskScore: Math.min(10, Math.max(1, Math.round((failed / Math.max(1, total)) * 10))), group: "security" as const },
+      { name: "GDPR", issues: warnings, riskScore: Math.min(10, Math.max(1, Math.round((warnings / Math.max(1, total)) * 10))), group: "governance" as const },
+      { name: "HIPAA", issues: 0, riskScore: 2, group: "risk" as const },
+      { name: "SOC 2", issues: 0, riskScore: 2, group: "security" as const },
+    ];
+
+    // Build recommendations by flattening/removing duplicates, keep first ~6
+    const recommendations: Array<string> = Array.from(
+      new Set(useCases.flatMap((u) => u.remediation)),
+    ).slice(0, 6);
+
+    return {
+      prompt,
+      summary: summaries,
+      scanSummary: { passed, failed, warnings, total },
+      standards,
+      recommendations,
+      trend: [],
+      useCases,
+    };
   }
 
   // Convincing but dummy content, seeded by prompt length for variety
@@ -694,7 +851,7 @@ export default function Summary() {
                               ))}
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-stone-800 mb-1">Suggested remediation:</div>
+                              <div className="text-sm font-medium text-stone-800 mb-1">What should you do</div>
                               <ul className="list-disc pl-5 space-y-1 text-sm text-stone-800">
                                 {uc.remediation.map((r, idx) => (
                                   <li key={idx}>{r}</li>
