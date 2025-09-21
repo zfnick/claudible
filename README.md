@@ -1,6 +1,7 @@
 # Claudible – Audit Assistant
 
 **AI-Enhanced Compliance Audit Assistant**
+
 Scan cloud configurations and logs to flag compliance risks (e.g., HIPAA, GDPR, ISO 27001, PDPA) and produce human-readable explanations for audit readiness. This repository contains a **frontend-focused hackathon prototype** that showcases the concept of an AI-driven compliance assistant. Reports are session-based, with no long-term data storage.
 
 ---
