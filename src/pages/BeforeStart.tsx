@@ -69,7 +69,7 @@ export default function BeforeStart() {
                     placeholder="XXXX-XXXX-XXXX-XXXX"
                     value={accountId}
                     onChange={(e) => setAccountId(e.target.value)}
-                    className="bg-white"
+                    className="bg-white text-stone-900 placeholder:text-stone-500"
                   />
                   <Button
                     onClick={() => navigate("/summary")}
