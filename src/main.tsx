@@ -2,8 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
 import { InstrumentationProvider } from "@/instrumentation.tsx";
 import AuthPage from "@/pages/Auth.tsx";
-import { ConvexAuthProvider } from "@convex-dev/auth/react";
-import { ConvexReactClient } from "convex/react";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { StrictMode, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
@@ -16,8 +15,6 @@ import BeforeStart from "@/pages/BeforeStart.tsx";
 import Summary from "./pages/Summary.tsx";
 import Dashboard from "@/pages/Dashboard.tsx";
 import "./types/global.d.ts";
-
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
 
 
@@ -49,7 +46,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <VlyToolbar />
     <InstrumentationProvider>
-      <ConvexAuthProvider client={convex}>
+      <AuthProvider>
         <BrowserRouter>
           <RouteSyncer />
           <Routes>
@@ -64,7 +61,7 @@ createRoot(document.getElementById("root")!).render(
           </Routes>
         </BrowserRouter>
         <Toaster />
-      </ConvexAuthProvider>
+      </AuthProvider>
     </InstrumentationProvider>
   </StrictMode>,
 );

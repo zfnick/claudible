@@ -43,8 +43,14 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     setError(null);
     try {
       const formData = new FormData(event.currentTarget);
-      await signIn("email-otp", formData);
-      setStep({ email: formData.get("email") as string });
+      const email = formData.get("email") as string;
+      
+      if (!email) {
+        throw new Error("Please enter a valid email address");
+      }
+      
+      // For our static demo, we'll just simulate sending OTP
+      setStep({ email });
       setIsLoading(false);
     } catch (error) {
       console.error("Email sign-in error:", error);
@@ -62,8 +68,17 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     setIsLoading(true);
     setError(null);
     try {
-      const formData = new FormData(event.currentTarget);
-      await signIn("email-otp", formData);
+      if (typeof step !== 'object' || !step.email) {
+        throw new Error("Invalid authentication state");
+      }
+      
+      // For our static demo, accept any 6-digit OTP
+      if (otp.length !== 6) {
+        throw new Error("Please enter a valid 6-digit code");
+      }
+      
+      // Sign in with the email
+      await signIn(step.email);
 
       console.log("signed in");
 

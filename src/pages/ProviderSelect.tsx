@@ -33,7 +33,7 @@ export default function ProviderSelect() {
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src="https://harmless-tapir-303.convex.cloud/api/storage/680f6340-5118-48fd-990f-c89cecd311ef"
+              src="/logo.png"
               alt="Claudible logo"
               className="h-8 w-8 object-contain"
             />
