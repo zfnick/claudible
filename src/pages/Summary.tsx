@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, SendHorizonal, Shield, AlertTriangle, CheckCircle, ChevronDown } from "lucide-react";
+import { Loader2, SendHorizonal, Shield, AlertTriangle, CheckCircle, ChevronDown, Download as DownloadIcon } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 /* removed Recharts imports */
 
@@ -610,7 +610,7 @@ function extractHighLevelStats(text: string) {
   };
 }
 
-// Temporary no-op to prevent runtime crashes if any stale <Download /> remains
+/* Temporary no-op to prevent runtime crashes if any stale <Download /> remains */
 const Download = () => null;
 
 export default function Summary() {
@@ -633,6 +633,12 @@ export default function Summary() {
 
   // Visualization state: start EMPTY until a valid question arrives
   const [viz, setViz] = useState<Viz | null>(null);
+
+  // Add: print handler inside component so it can access 'viz' safely
+  const handlePrint = () => {
+    if (!viz) return;
+    window.print();
+  };
 
   // removed pieData (Compliance Overview removed)
 
@@ -967,10 +973,39 @@ export default function Summary() {
             transition={{ duration: 0.5 }}
             className="lg:col-span-7"
           >
-            <Card className="bg-amber-200/60 border-stone-300 h-[78vh] flex flex-col overflow-hidden">
+            <Card id="print-area" className="bg-amber-200/60 border-stone-300 h-[78vh] flex flex-col overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between shrink-0">
                 <CardTitle className="text-3xl tracking-tight text-stone-900">Summary</CardTitle>
+                {/* Download PDF button (hidden in print) */}
+                {viz ? (
+                  <Button onClick={handlePrint} className="no-print gap-2 bg-stone-800 hover:bg-stone-900">
+                    <DownloadIcon className="h-4 w-4" />
+                    Download PDF
+                  </Button>
+                ) : null}
               </CardHeader>
+
+              {/* Print-only header for a polished PDF cover */}
+              {viz ? (
+                <div className="print-only px-6 -mt-4 mb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src="https://harmless-tapir-303.convex.cloud/api/storage/680f6340-5118-48fd-990f-c89cecd311ef"
+                        alt="Claudible logo"
+                        className="h-8 w-8 object-contain"
+                      />
+                      <div className="text-xl font-semibold tracking-wide">CLAUDIBLE – Compliance Audit Summary</div>
+                    </div>
+                    <div className="text-sm text-stone-600">
+                      {new Date().toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="mt-2 text-sm text-stone-700">
+                    Generated report from your latest session. Informational only; not a certified audit.
+                  </div>
+                </div>
+              ) : null}
 
               {/* Scrollable content area */}
               <CardContent className="flex-1 overflow-y-auto space-y-6">
@@ -1162,7 +1197,7 @@ export default function Summary() {
             transition={{ duration: 0.5 }}
             className="lg:col-span-5"
           >
-            <Card className="bg-white/60 backdrop-blur-md border-stone-300 shadow-sm h-[78vh] flex flex-col">
+            <Card className="no-print bg-white/60 backdrop-blur-md border-stone-300 shadow-sm h-[78vh] flex flex-col">
               <CardHeader>
                 <CardTitle className="text-lg text-stone-900">Assistant</CardTitle>
               </CardHeader>
