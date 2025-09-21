@@ -535,7 +535,7 @@ function generateMockAnalysis(prompt: string) {
   });
 
   // Add curated demo use cases for the cloud configuration checks
-  const useCases = [
+  const baseUseCases = [
     {
       service: "S3 Buckets",
       title: "Public bucket accidentally containing sensitive customer data",
@@ -579,6 +579,8 @@ function generateMockAnalysis(prompt: string) {
       severity: "Medium" as const,
     },
   ];
+  // Append Malaysia-specific use cases to the existing 3
+  const useCases = [...baseUseCases, ...buildMalaysiaUseCases()];
 
   return {
     prompt,
@@ -832,8 +834,15 @@ export default function Summary() {
                             <div className="flex items-center justify-between gap-3 mb-2">
                               <div className="flex items-center gap-2">
                                 <Badge className="bg-stone-800 text-stone-100">{uc.service}</Badge>
-                                <span className="text-xs rounded-full border px-2 py-0.5
-                                  {uc.severity === 'High' ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-amber-100 text-amber-800 border-amber-200'}">
+                                <span
+                                  className={`text-xs rounded-full border px-2 py-0.5 ${
+                                    uc.severity === "High"
+                                      ? "bg-rose-100 text-rose-700 border-rose-200"
+                                      : uc.severity === "Medium"
+                                        ? "bg-amber-100 text-amber-800 border-amber-200"
+                                        : "bg-emerald-100 text-emerald-700 border-emerald-200"
+                                  }`}
+                                >
                                   {uc.severity} Severity
                                 </span>
                               </div>
