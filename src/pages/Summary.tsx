@@ -350,10 +350,12 @@ export default function Summary() {
             transition={{ duration: 0.5 }}
             className="lg:col-span-5"
           >
-            <Card className="bg-white border-stone-200 h-[78vh] flex flex-col">
+            <Card className="bg-white/60 backdrop-blur-md border-stone-300 shadow-sm h-[78vh] flex flex-col">
               <CardHeader>
                 <CardTitle className="text-lg text-stone-900">Assistant</CardTitle>
               </CardHeader>
+
+              {/* Glassy message container & bubbles */}
               <CardContent className="flex-1 overflow-y-auto space-y-4 pr-2">
                 {messages.map((m, idx) => {
                   const isUser = m.role === "user";
@@ -364,7 +366,7 @@ export default function Summary() {
                         className={`max-w-[80%] px-4 py-2 rounded-2xl border ${
                           isUser
                             ? "bg-stone-800 text-stone-50 border-stone-700"
-                            : "bg-amber-200/80 text-stone-900 border-stone-300"
+                            : "bg-white/60 backdrop-blur-sm text-stone-900 border-stone-300 shadow-sm"
                         }`}
                       >
                         {stats ? (
@@ -396,9 +398,9 @@ export default function Summary() {
                   );
                 })}
 
-                {/* Interactive loader instead of text bubbles while thinking */}
+                {/* Make the loader glassy as well */}
                 {loading && (
-                  <div className="border rounded-2xl bg-amber-50 text-stone-900 border-stone-300 p-4">
+                  <div className="border rounded-2xl bg-white/60 backdrop-blur-sm text-stone-900 border-stone-300 p-4 shadow-sm">
                     <div className="mb-2 text-sm font-medium">Analyzing your request…</div>
                     
                     <div className="flex items-center justify-between mb-1 text-xs text-stone-600">
@@ -426,7 +428,8 @@ export default function Summary() {
                 )}
               </CardContent>
 
-              <div className="p-3 border-t border-stone-200">
+              {/* Keep input readable; leave white input but place it on glass card */}
+              <div className="p-3 border-t border-stone-200/70">
                 <div className="flex gap-2">
                   <Input
                     ref={inputRef}
